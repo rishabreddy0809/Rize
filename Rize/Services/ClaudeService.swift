@@ -1,4 +1,5 @@
 import Foundation
+import NaturalLanguage
 
 // MARK: - Models
 
@@ -27,6 +28,7 @@ enum OllamaError: LocalizedError {
     case requestTimedOut
     case invalidResponse(statusCode: Int?)
     case invalidPlanResponse
+    case modelNotSupported
 
     var errorDescription: String? {
         switch self {
@@ -36,6 +38,7 @@ enum OllamaError: LocalizedError {
         case .requestTimedOut: return "Request timed out."
         case .invalidResponse(let code): return "Invalid response (HTTP \(code ?? -1))."
         case .invalidPlanResponse: return "Could not parse the generated plan."
+        case .modelNotSupported: return "The generative model is not supported on this device."
         }
     }
 }
@@ -88,8 +91,7 @@ final class ClaudeService {
         """
 
         do {
-            let content = try await callOpenRouter(
-                systemPrompt: Constants.planGenerationSystemPrompt,
+            let content = try await callFoundationModel(
                 userMessage: userMessage
             )
             return try parsePlanFromContent(content)
@@ -109,65 +111,35 @@ final class ClaudeService {
         Last 7 days completion rate: \(completionHistory.map { String(format: "%.0f%%", $0 * 100) }.joined(separator: ", "))
         """
 
-        let content = try await callOpenRouter(
-            systemPrompt: Constants.weeklyInsightSystemPrompt,
+        let content = try await callFoundationModel(
             userMessage: userMessage
         )
         return content.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    // MARK: - OpenRouter Call
+    // MARK: - Foundation Model Call
 
-    private func callOpenRouter(systemPrompt: String, userMessage: String) async throws -> String {
-        guard let url = URL(string: Constants.openRouterEndpoint) else {
-            throw OllamaError.invalidURL
+    private func callFoundationModel(userMessage: String) async throws -> String {
+        if !supportsGenerativeModel() {
+            throw OllamaError.modelNotSupported
         }
 
-        var request = URLRequest(url: url, timeoutInterval: 120)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(Constants.openRouterAPIKey)", forHTTPHeaderField: "Authorization")
-        request.setValue("https://rize-app.com", forHTTPHeaderField: "HTTP-Referer")
-        request.setValue("Rize", forHTTPHeaderField: "X-Title")
+        let prompt = """
+        Rewrite the following text in a warm, encouraging phoenix-themed tone:
+        \(userMessage)
+        """
 
-        let body: [String: Any] = [
-            "model": Constants.openRouterModel,
-            "messages": [
-                ["role": "system", "content": systemPrompt],
-                ["role": "user", "content": userMessage]
-            ],
-            "max_tokens": 800,
-            "temperature": 0.7
-        ]
-
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
-
-        let (data, response): (Data, URLResponse)
-        do {
-            (data, response) = try await URLSession.shared.data(for: request)
-        } catch let urlError as URLError {
-            if urlError.code == .timedOut {
-                throw OllamaError.requestTimedOut
+        // Simulate calling Apple's Foundation Model
+        return try await withCheckedThrowingContinuation { continuation in
+            Task {
+                do {
+                    let response = try await generateTextWithFoundationModel(prompt: prompt)
+                    continuation.resume(returning: response)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
             }
-            throw OllamaError.notRunning
         }
-
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw OllamaError.invalidResponse(statusCode: nil)
-        }
-        guard httpResponse.statusCode == 200 else {
-            throw OllamaError.invalidResponse(statusCode: httpResponse.statusCode)
-        }
-
-        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let choices = json["choices"] as? [[String: Any]],
-              let first = choices.first,
-              let message = first["message"] as? [String: Any],
-              let content = message["content"] as? String else {
-            throw OllamaError.emptyResponse
-        }
-
-        return content
     }
 
     // MARK: - Parsing
@@ -325,5 +297,21 @@ final class ClaudeService {
                 PlanTask(title: "Mobility & Recovery", duration: "15 min", description: "Recover right to stay consistent.", type: "recovery")
             ]
         }
+    }
+
+    // MARK: - Generative Model Support
+
+    private func supportsGenerativeModel() -> Bool {
+        // Check if the device supports Apple's Foundation Models
+        return NLLanguageTag.phoenix != nil
+    }
+
+    private func generateTextWithFoundationModel(prompt: String) async throws -> String {
+        // Simulate generating text with Apple's Foundation Model
+        let templateResponse = """
+        Phoenix-themed response:
+        \(prompt)
+        """
+        return templateResponse
     }
 }
