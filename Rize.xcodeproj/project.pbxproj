@@ -1,0 +1,487 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AA000201 /* RizeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000200 /* RizeApp.swift */; };
+		AA000203 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000202 /* Constants.swift */; };
+		AA000205 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000204 /* Color+Hex.swift */; };
+		AA000207 /* KingdomDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000206 /* KingdomDesignSystem.swift */; };
+		AA000209 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000208 /* UserProfile.swift */; };
+		AA000211 /* DailyEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000210 /* DailyEntry.swift */; };
+		AA000213 /* RizeTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000212 /* RizeTask.swift */; };
+		AA000215 /* XPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000214 /* XPManager.swift */; };
+		AA000217 /* ClaudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000216 /* ClaudeService.swift */; };
+		AA000219 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000218 /* HealthKitManager.swift */; };
+		AA000221 /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000220 /* CalendarManager.swift */; };
+		AA000223 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000222 /* NotificationManager.swift */; };
+		AA000225 /* AchievementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000224 /* AchievementManager.swift */; };
+		AA000227 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000226 /* SubscriptionManager.swift */; };
+		AA000229 /* KingdomStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000228 /* KingdomStateManager.swift */; };
+		AA000231 /* RyzDialogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000230 /* RyzDialogue.swift */; };
+		AA000233 /* ParticleSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000232 /* ParticleSystem.swift */; };
+		AA000235 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000234 /* OnboardingView.swift */; };
+		AA000237 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000236 /* MainTabView.swift */; };
+		AA000239 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000238 /* TodayView.swift */; };
+		AA000241 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000240 /* ProgressView.swift */; };
+		AA000243 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000242 /* ProfileView.swift */; };
+		AA000245 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000244 /* PaywallView.swift */; };
+		AA000247 /* KingdomTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000246 /* KingdomTabView.swift */; };
+		AA000251 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000250 /* Assets.xcassets */; };
+		AA000253 /* Rize.storekit in Resources */ = {isa = PBXBuildFile; fileRef = AA000252 /* Rize.storekit */; };
+		AA000261 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000260 /* HealthKit.framework */; };
+		AA000263 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000262 /* EventKit.framework */; };
+		AA000265 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000264 /* StoreKit.framework */; };
+		AA000267 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000266 /* UserNotifications.framework */; };
+		AA000282 /* MorphingTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000281 /* MorphingTabBar.swift */; };
+		AB3728C03007D5670021D221 /* Tier2.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728BF3007D5670021D221 /* Tier2.atlas */; };
+		AB3728C83009511B0021D221 /* Tier3.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728C73009511B0021D221 /* Tier3.atlas */; };
+		AB3728CA300C25CF0021D221 /* Tier4.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728C9300C25CF0021D221 /* Tier4.atlas */; };
+		AB7B176B3000050B0092E0D2 /* Tier1_Ashes.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB7B176A3000050B0092E0D2 /* Tier1_Ashes.atlas */; };
+		BE9B254B2FFB14F800CE66E1 /* Phoenix.atlas in Resources */ = {isa = PBXBuildFile; fileRef = BE9B254A2FFB14F700CE66E1 /* Phoenix.atlas */; };
+		BE9B254D2FFB15A400CE66E1 /* PhoenixSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9B254C2FFB15A400CE66E1 /* PhoenixSprite.swift */; };
+		BE9B254F2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas in Resources */ = {isa = PBXBuildFile; fileRef = BE9B254E2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AA000200 /* RizeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeApp.swift; sourceTree = "<group>"; };
+		AA000202 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		AA000204 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
+		AA000206 /* KingdomDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KingdomDesignSystem.swift; sourceTree = "<group>"; };
+		AA000208 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		AA000210 /* DailyEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyEntry.swift; sourceTree = "<group>"; };
+		AA000212 /* RizeTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeTask.swift; sourceTree = "<group>"; };
+		AA000214 /* XPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPManager.swift; sourceTree = "<group>"; };
+		AA000216 /* ClaudeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeService.swift; sourceTree = "<group>"; };
+		AA000218 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		AA000220 /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManager.swift; sourceTree = "<group>"; };
+		AA000222 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		AA000224 /* AchievementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementManager.swift; sourceTree = "<group>"; };
+		AA000226 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
+		AA000228 /* KingdomStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KingdomStateManager.swift; sourceTree = "<group>"; };
+		AA000230 /* RyzDialogue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RyzDialogue.swift; sourceTree = "<group>"; };
+		AA000232 /* ParticleSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleSystem.swift; sourceTree = "<group>"; };
+		AA000234 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		AA000236 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		AA000238 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
+		AA000240 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
+		AA000242 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		AA000244 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		AA000246 /* KingdomTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KingdomTabView.swift; sourceTree = "<group>"; };
+		AA000250 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AA000252 /* Rize.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = Rize.storekit; path = ../Rize.storekit; sourceTree = "<group>"; };
+		AA000255 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA000260 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		AA000262 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
+		AA000264 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		AA000266 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+		AA000270 /* Rize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rize.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA000281 /* MorphingTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorphingTabBar.swift; sourceTree = "<group>"; };
+		AB3728BF3007D5670021D221 /* Tier2.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier2.atlas; sourceTree = "<group>"; };
+		AB3728C73009511B0021D221 /* Tier3.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier3.atlas; sourceTree = "<group>"; };
+		AB3728C9300C25CF0021D221 /* Tier4.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier4.atlas; sourceTree = "<group>"; };
+		AB7B176A3000050B0092E0D2 /* Tier1_Ashes.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier1_Ashes.atlas; sourceTree = "<group>"; };
+		BE9B254A2FFB14F700CE66E1 /* Phoenix.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Phoenix.atlas; sourceTree = "<group>"; };
+		BE9B254C2FFB15A400CE66E1 /* PhoenixSprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoenixSprite.swift; sourceTree = "<group>"; };
+		BE9B254E2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = PhoenixPerchedSmall.atlas; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AA000020 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000261 /* HealthKit.framework in Frameworks */,
+				AA000263 /* EventKit.framework in Frameworks */,
+				AA000265 /* StoreKit.framework in Frameworks */,
+				AA000267 /* UserNotifications.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AA000010 = {
+			isa = PBXGroup;
+			children = (
+				AA000011 /* Rize */,
+				AA000012 /* Frameworks */,
+				AA000013 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AA000011 /* Rize */ = {
+			isa = PBXGroup;
+			children = (
+				AA000200 /* RizeApp.swift */,
+				BE9B254C2FFB15A400CE66E1 /* PhoenixSprite.swift */,
+				AB3728C9300C25CF0021D221 /* Tier4.atlas */,
+				AB3728C73009511B0021D221 /* Tier3.atlas */,
+				AB3728BF3007D5670021D221 /* Tier2.atlas */,
+				AB7B176A3000050B0092E0D2 /* Tier1_Ashes.atlas */,
+				BE9B254A2FFB14F700CE66E1 /* Phoenix.atlas */,
+				BE9B254E2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas */,
+				AA000202 /* Constants.swift */,
+				AA000250 /* Assets.xcassets */,
+				AA000255 /* Info.plist */,
+				AA000252 /* Rize.storekit */,
+				AA000014 /* Extensions */,
+				AA000015 /* Kingdom */,
+				AA000016 /* Models */,
+				AA000017 /* Services */,
+				AA000018 /* Components */,
+				AA000019 /* Views */,
+				AA000280 /* Helpers */,
+			);
+			path = Rize;
+			sourceTree = "<group>";
+		};
+		AA000012 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				AA000260 /* HealthKit.framework */,
+				AA000262 /* EventKit.framework */,
+				AA000264 /* StoreKit.framework */,
+				AA000266 /* UserNotifications.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AA000013 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AA000270 /* Rize.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA000014 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				AA000204 /* Color+Hex.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		AA000015 /* Kingdom */ = {
+			isa = PBXGroup;
+			children = (
+				AA000206 /* KingdomDesignSystem.swift */,
+			);
+			path = Kingdom;
+			sourceTree = "<group>";
+		};
+		AA000016 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AA000208 /* UserProfile.swift */,
+				AA000210 /* DailyEntry.swift */,
+				AA000212 /* RizeTask.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AA000017 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				AA000214 /* XPManager.swift */,
+				AA000216 /* ClaudeService.swift */,
+				AA000218 /* HealthKitManager.swift */,
+				AA000220 /* CalendarManager.swift */,
+				AA000222 /* NotificationManager.swift */,
+				AA000224 /* AchievementManager.swift */,
+				AA000226 /* SubscriptionManager.swift */,
+				AA000228 /* KingdomStateManager.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		AA000018 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				AA000230 /* RyzDialogue.swift */,
+				AA000232 /* ParticleSystem.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		AA000019 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AA000234 /* OnboardingView.swift */,
+				AA000236 /* MainTabView.swift */,
+				AA000238 /* TodayView.swift */,
+				AA000240 /* ProgressView.swift */,
+				AA000242 /* ProfileView.swift */,
+				AA000244 /* PaywallView.swift */,
+				AA000021 /* Kingdom */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA000021 /* Kingdom */ = {
+			isa = PBXGroup;
+			children = (
+				AA000246 /* KingdomTabView.swift */,
+			);
+			path = Kingdom;
+			sourceTree = "<group>";
+		};
+		AA000280 /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				AA000281 /* MorphingTabBar.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA000002 /* Rize */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA000036 /* Build configuration list for PBXNativeTarget "Rize" */;
+			buildPhases = (
+				AA000022 /* Sources */,
+				AA000020 /* Frameworks */,
+				AA000023 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Rize;
+			productName = Rize;
+			productReference = AA000270 /* Rize.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AA000002 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = AA000032 /* Build configuration list for PBXProject "Rize" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA000010;
+			productRefGroup = AA000013 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA000002 /* Rize */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA000023 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AB3728C83009511B0021D221 /* Tier3.atlas in Resources */,
+				AA000251 /* Assets.xcassets in Resources */,
+				AA000253 /* Rize.storekit in Resources */,
+				AB7B176B3000050B0092E0D2 /* Tier1_Ashes.atlas in Resources */,
+				BE9B254B2FFB14F800CE66E1 /* Phoenix.atlas in Resources */,
+				AB3728C03007D5670021D221 /* Tier2.atlas in Resources */,
+				AB3728CA300C25CF0021D221 /* Tier4.atlas in Resources */,
+				BE9B254F2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA000022 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000201 /* RizeApp.swift in Sources */,
+				AA000203 /* Constants.swift in Sources */,
+				AA000205 /* Color+Hex.swift in Sources */,
+				AA000207 /* KingdomDesignSystem.swift in Sources */,
+				AA000209 /* UserProfile.swift in Sources */,
+				AA000211 /* DailyEntry.swift in Sources */,
+				AA000213 /* RizeTask.swift in Sources */,
+				AA000215 /* XPManager.swift in Sources */,
+				BE9B254D2FFB15A400CE66E1 /* PhoenixSprite.swift in Sources */,
+				AA000217 /* ClaudeService.swift in Sources */,
+				AA000219 /* HealthKitManager.swift in Sources */,
+				AA000221 /* CalendarManager.swift in Sources */,
+				AA000223 /* NotificationManager.swift in Sources */,
+				AA000225 /* AchievementManager.swift in Sources */,
+				AA000227 /* SubscriptionManager.swift in Sources */,
+				AA000229 /* KingdomStateManager.swift in Sources */,
+				AA000231 /* RyzDialogue.swift in Sources */,
+				AA000233 /* ParticleSystem.swift in Sources */,
+				AA000235 /* OnboardingView.swift in Sources */,
+				AA000237 /* MainTabView.swift in Sources */,
+				AA000239 /* TodayView.swift in Sources */,
+				AA000241 /* ProgressView.swift in Sources */,
+				AA000243 /* ProfileView.swift in Sources */,
+				AA000245 /* PaywallView.swift in Sources */,
+				AA000247 /* KingdomTabView.swift in Sources */,
+				AA000282 /* MorphingTabBar.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA000030 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA000031 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AA000034 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SYLM5655ZW;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Rize/Info.plist;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.RishabReddy.Rize-Habit-App";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA000035 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = SYLM5655ZW;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Rize/Info.plist;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.RishabReddy.Rize-Habit-App";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA000032 /* Build configuration list for PBXProject "Rize" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA000030 /* Debug */,
+				AA000031 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA000036 /* Build configuration list for PBXNativeTarget "Rize" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA000034 /* Debug */,
+				AA000035 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA000001 /* Project object */;
+}
