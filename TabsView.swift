@@ -11,23 +11,28 @@ struct TabsView: View {
     ]
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ForEach(tabs.indices, id: \.self) { index in
+        MorphingTabBar(
+            activeTab: Binding<Tab> {
+                return tabs[selectedTab]
+            } set: { tab in
+                selectedTab = tabs.firstIndex(of: tab) ?? 0
+            },
+            isExpanded: $selectedTab != 0,
+            expandedContent: {
                 VStack {
-                    Text(tabs[index].title)
+                    Text(tabs[selectedTab].title)
                         .font(.largeTitle)
                 }
-                .tabItem {
-                    Image(systemName: tabs[index].icon)
-                    Text(tabs[index].title)
-                }
-                .tag(index)
             }
-        }
+        )
     }
 }
 
 struct TabItem: MorphingTabProtocol {
     var title: String
     var icon: String
+    
+    var symbolImage: String {
+        return icon
+    }
 }
