@@ -4,13 +4,13 @@ import PackageDescription
 let package = Package(
     name: "Rize",
     dependencies: [
-        // Add other dependencies here if needed
+        .package(url: "https://github.com/apple/coremltools", from: "2.0.0")
     ],
     targets: [
         .target(
             name: "Rize",
             dependencies: [
-                // Add other dependencies here if needed
+                .product(name: "CoreML", package: "coremltools")
             ]
         ),
     ]
