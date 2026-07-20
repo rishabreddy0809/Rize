@@ -4,6 +4,11 @@ struct StravaTabView: View {
     @State private var isStravaConnected = false
     @State private var workouts: [Workout] = []
     
+    // Placeholder for Strava API key
+    let stravaClientID = "YOUR_STRAVA_CLIENT_ID"
+    let stravaRedirectURI = "YOUR_STRAVA_REDIRECT_URI"
+    let stravaAuthorizationURL = "https://www.strava.com/oauth/authorize?client_id=\(stravaClientID)&response_type=code&redirect_uri=\(stravaRedirectURI)&approval_prompt=auto&scope=read_all,activity:read_all"
+    
     var body: some View {
         VStack {
             if isStravaConnected {
@@ -39,14 +44,13 @@ struct StravaTabView: View {
     }
     
     private func connectToStrava() {
-        // Implement Strava connection logic here
-        isStravaConnected = true
+        // Open Strava authorization URL in Safari
+        if let url = URL(string: stravaAuthorizationURL) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
         
-        // Simulate fetching workouts
-        workouts = [
-            Workout(name: "Morning Run", distance: 5.2),
-            Workout(name: "Evening Ride", distance: 10.4)
-        ]
+        // Handle the redirect and fetch access token
+        // Fetch workouts using the access token
     }
 }
 
