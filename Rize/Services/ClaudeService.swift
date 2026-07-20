@@ -129,17 +129,8 @@ final class ClaudeService {
         \(userMessage)
         """
 
-        // Simulate calling Apple's Foundation Model
-        return try await withCheckedThrowingContinuation { continuation in
-            Task {
-                do {
-                    let response = try await generateTextWithFoundationModel(prompt: prompt)
-                    continuation.resume(returning: response)
-                } catch {
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
+        // Use GenerativeEngine to generate text with Foundation Model
+        return try await GenerativeEngine().generateTextWithFoundationModel(prompt: prompt)
     }
 
     // MARK: - Parsing
@@ -304,14 +295,5 @@ final class ClaudeService {
     private func supportsGenerativeModel() -> Bool {
         // Check if the device supports Apple's Foundation Models
         return NLLanguageTag.phoenix != nil
-    }
-
-    private func generateTextWithFoundationModel(prompt: String) async throws -> String {
-        // Simulate generating text with Apple's Foundation Model
-        let templateResponse = """
-        Phoenix-themed response:
-        \(prompt)
-        """
-        return templateResponse
     }
 }
