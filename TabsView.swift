@@ -2,37 +2,42 @@
 
 import SwiftUI
 
-struct TabsView: View {
-    @State private var selectedTab = 0
+enum KingdomTab: MorphingTabProtocol & CaseIterable {
+    case phoenix
+    case tasks
+    case strava
     
-    let tabs: [MorphingTabProtocol] = [
-        TabItem(title: "Home", icon: "house"),
-        TabItem(title: "Profile", icon: "person")
-    ]
+    var title: String {
+        switch self {
+        case .phoenix: return "Phoenix"
+        case .tasks: return "Tasks"
+        case .strava: return "Strava"
+        }
+    }
+    
+    var icon: String {
+        switch self {
+        case .phoenix: return "flame.fill"
+        case .tasks: return "list.bullet"
+        case .strava: return "figure.walk.circle.fill"
+        }
+    }
+}
+
+struct TabsView: View {
+    @State private var activeTab = KingdomTab.phoenix
+    @State private var isExpanded = false
     
     var body: some View {
         MorphingTabBar(
-            activeTab: Binding<Tab> {
-                return tabs[selectedTab]
-            } set: { tab in
-                selectedTab = tabs.firstIndex(of: tab) ?? 0
-            },
-            isExpanded: $selectedTab != 0,
+            activeTab: $activeTab,
+            isExpanded: $isExpanded,
             expandedContent: {
                 VStack {
-                    Text(tabs[selectedTab].title)
+                    Text(activeTab.title)
                         .font(.largeTitle)
                 }
             }
         )
-    }
-}
-
-struct TabItem: MorphingTabProtocol {
-    var title: String
-    var icon: String
-    
-    var symbolImage: String {
-        return icon
     }
 }

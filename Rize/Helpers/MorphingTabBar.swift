@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MorphingTabBar<Tab: MorphingTabProtocol, ExpandedContent: View>: View {
+struct MorphingTabBar<Tab: MorphingTabProtocol & CaseIterable, ExpandedContent: View>: View {
     @Binding var activeTab: Tab
     @Binding var isExpanded: Bool
     @ViewBuilder var expandedContent: ExpandedContent
