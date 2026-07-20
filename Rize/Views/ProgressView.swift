@@ -249,20 +249,13 @@ struct RizeProgressScreen: View {
         let energyHistory = last7Entries.map { $0.energyScore ?? 0 }
         let completionHistory = last7Entries.map { $0.completionRate }
         Task {
-            do {
-                let insight = try await ClaudeService.shared.generateWeeklyInsight(
-                    energyHistory: energyHistory,
-                    completionHistory: completionHistory
-                )
-                await MainActor.run {
-                    weeklyInsight = insight
-                    loadingInsight = false
-                }
-            } catch {
-                await MainActor.run {
-                    weeklyInsight = "Keep showing up. Consistency is everything."
-                    loadingInsight = false
-                }
+            let insight = await CoachingNarrator.shared.weeklyInsight(
+                energyHistory: energyHistory,
+                completionHistory: completionHistory
+            )
+            await MainActor.run {
+                weeklyInsight = insight
+                loadingInsight = false
             }
         }
     }

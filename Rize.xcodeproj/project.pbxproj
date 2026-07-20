@@ -15,7 +15,6 @@
 		AA000211 /* DailyEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000210 /* DailyEntry.swift */; };
 		AA000213 /* RizeTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000212 /* RizeTask.swift */; };
 		AA000215 /* XPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000214 /* XPManager.swift */; };
-		AA000217 /* ClaudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000216 /* ClaudeService.swift */; };
 		AA000219 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000218 /* HealthKitManager.swift */; };
 		AA000221 /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000220 /* CalendarManager.swift */; };
 		AA000223 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000222 /* NotificationManager.swift */; };
@@ -38,6 +37,14 @@
 		AA000265 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000264 /* StoreKit.framework */; };
 		AA000267 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000266 /* UserNotifications.framework */; };
 		AA000282 /* MorphingTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000281 /* MorphingTabBar.swift */; };
+		AA000299 /* CoachingNarrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000298 /* CoachingNarrator.swift */; };
+		AA000301 /* TaskFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000300 /* TaskFactory.swift */; };
+		AA000286 /* MorphingTabProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000285 /* MorphingTabProtocol.swift */; };
+		AA000288 /* StravaTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000287 /* StravaTabView.swift */; };
+		AA000290 /* StravaManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000289 /* StravaManager.swift */; };
+		AA000293 /* PlanInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000292 /* PlanInput.swift */; };
+		AA000295 /* DailyPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000294 /* DailyPlan.swift */; };
+		AA000297 /* PlanningEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000296 /* PlanningEngine.swift */; };
 		AB3728C03007D5670021D221 /* Tier2.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728BF3007D5670021D221 /* Tier2.atlas */; };
 		AB3728C83009511B0021D221 /* Tier3.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728C73009511B0021D221 /* Tier3.atlas */; };
 		AB3728CA300C25CF0021D221 /* Tier4.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728C9300C25CF0021D221 /* Tier4.atlas */; };
@@ -56,7 +63,6 @@
 		AA000210 /* DailyEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyEntry.swift; sourceTree = "<group>"; };
 		AA000212 /* RizeTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeTask.swift; sourceTree = "<group>"; };
 		AA000214 /* XPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPManager.swift; sourceTree = "<group>"; };
-		AA000216 /* ClaudeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeService.swift; sourceTree = "<group>"; };
 		AA000218 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
 		AA000220 /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManager.swift; sourceTree = "<group>"; };
 		AA000222 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
@@ -81,6 +87,14 @@
 		AA000266 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		AA000270 /* Rize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rize.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA000281 /* MorphingTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorphingTabBar.swift; sourceTree = "<group>"; };
+		AA000298 /* CoachingNarrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingNarrator.swift; sourceTree = "<group>"; };
+		AA000300 /* TaskFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskFactory.swift; sourceTree = "<group>"; };
+		AA000285 /* MorphingTabProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MorphingTabProtocol.swift; path = ../MorphingTabProtocol.swift; sourceTree = "<group>"; };
+		AA000287 /* StravaTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StravaTabView.swift; sourceTree = "<group>"; };
+		AA000289 /* StravaManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StravaManager.swift; sourceTree = "<group>"; };
+		AA000292 /* PlanInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanInput.swift; sourceTree = "<group>"; };
+		AA000294 /* DailyPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyPlan.swift; sourceTree = "<group>"; };
+		AA000296 /* PlanningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningEngine.swift; sourceTree = "<group>"; };
 		AB3728BF3007D5670021D221 /* Tier2.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier2.atlas; sourceTree = "<group>"; };
 		AB3728C73009511B0021D221 /* Tier3.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier3.atlas; sourceTree = "<group>"; };
 		AB3728C9300C25CF0021D221 /* Tier4.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier4.atlas; sourceTree = "<group>"; };
@@ -126,6 +140,7 @@
 				BE9B254A2FFB14F700CE66E1 /* Phoenix.atlas */,
 				BE9B254E2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas */,
 				AA000202 /* Constants.swift */,
+				AA000285 /* MorphingTabProtocol.swift */,
 				AA000250 /* Assets.xcassets */,
 				AA000255 /* Info.plist */,
 				AA000252 /* Rize.storekit */,
@@ -181,6 +196,8 @@
 				AA000208 /* UserProfile.swift */,
 				AA000210 /* DailyEntry.swift */,
 				AA000212 /* RizeTask.swift */,
+				AA000292 /* PlanInput.swift */,
+				AA000294 /* DailyPlan.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -189,13 +206,16 @@
 			isa = PBXGroup;
 			children = (
 				AA000214 /* XPManager.swift */,
-				AA000216 /* ClaudeService.swift */,
 				AA000218 /* HealthKitManager.swift */,
 				AA000220 /* CalendarManager.swift */,
 				AA000222 /* NotificationManager.swift */,
 				AA000224 /* AchievementManager.swift */,
 				AA000226 /* SubscriptionManager.swift */,
 				AA000228 /* KingdomStateManager.swift */,
+				AA000289 /* StravaManager.swift */,
+				AA000296 /* PlanningEngine.swift */,
+				AA000298 /* CoachingNarrator.swift */,
+				AA000300 /* TaskFactory.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -218,6 +238,7 @@
 				AA000240 /* ProgressView.swift */,
 				AA000242 /* ProfileView.swift */,
 				AA000244 /* PaywallView.swift */,
+				AA000287 /* StravaTabView.swift */,
 				AA000021 /* Kingdom */,
 			);
 			path = Views;
@@ -324,7 +345,6 @@
 				AA000213 /* RizeTask.swift in Sources */,
 				AA000215 /* XPManager.swift in Sources */,
 				BE9B254D2FFB15A400CE66E1 /* PhoenixSprite.swift in Sources */,
-				AA000217 /* ClaudeService.swift in Sources */,
 				AA000219 /* HealthKitManager.swift in Sources */,
 				AA000221 /* CalendarManager.swift in Sources */,
 				AA000223 /* NotificationManager.swift in Sources */,
@@ -341,6 +361,14 @@
 				AA000245 /* PaywallView.swift in Sources */,
 				AA000247 /* KingdomTabView.swift in Sources */,
 				AA000282 /* MorphingTabBar.swift in Sources */,
+				AA000299 /* CoachingNarrator.swift in Sources */,
+				AA000301 /* TaskFactory.swift in Sources */,
+				AA000286 /* MorphingTabProtocol.swift in Sources */,
+				AA000288 /* StravaTabView.swift in Sources */,
+				AA000290 /* StravaManager.swift in Sources */,
+				AA000293 /* PlanInput.swift in Sources */,
+				AA000295 /* DailyPlan.swift in Sources */,
+				AA000297 /* PlanningEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -371,7 +399,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -399,7 +427,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;

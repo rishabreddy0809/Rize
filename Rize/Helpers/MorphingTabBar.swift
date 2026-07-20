@@ -1,79 +1,69 @@
 import SwiftUI
 
+/// A compact, system-style tab bar with Apple's Liquid Glass background on iOS 26 and later.
 struct MorphingTabBar<Tab: MorphingTabProtocol & CaseIterable, ExpandedContent: View>: View {
     @Binding var activeTab: Tab
     @Binding var isExpanded: Bool
     @ViewBuilder var expandedContent: ExpandedContent
-    @State private var viewWidth: CGFloat?
-    
+
     var body: some View {
         ZStack {
-            Spacer()
-            let symbols = Array(Tab.allCases).compactMap({ $0.symbolImage })
-            let selectedIndex = Binding {
-                return symbols.firstIndex(of: activeTab.symbolImage) ?? 0
-            } set: { index in
-                activeTab = Array(Tab.allCases)[index]
-            }
-            
-            if let viewWidth {
-                let progress: CGFloat = isExpanded ? 1 : 0
-                let labelSize: CGSize = CGSize(width: viewWidth, height: 52)
-                let cornerRadius: CGFloat = labelSize.height / 2
-                
+            GeometryReader { geometry in
+                let tabs = Array(Tab.allCases)
+                let tabWidth = geometry.size.width / CGFloat(max(tabs.count, 1))
+
                 HStack(spacing: 0) {
-                    ForEach(symbols.indices, id: \.self) { index in
-                        TabLabel(
-                            symbol: symbols[index],
-                            title: Array(Tab.allCases)[index].title,
-                            isSelected: selectedIndex.wrappedValue == index,
-                            progress: progress,
-                            labelSize: labelSize,
-                            cornerRadius: cornerRadius
-                        )
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                activeTab = Array(Tab.allCases)[index]
+                    ForEach(tabs.indices, id: \.self) { index in
+                        let tab = tabs[index]
+
+                        Button {
+                            withAnimation(.spring(response: 0.32, dampingFraction: 0.8)) {
+                                activeTab = tab
                             }
+                        } label: {
+                            Image(systemName: tab.symbolImage)
+                                .font(.system(size: 18, weight: .semibold))
+                                .frame(width: tabWidth, height: 52)
+                                .foregroundStyle(activeTab.symbolImage == tab.symbolImage ? .primary : .secondary)
+                                .background {
+                                    if activeTab.symbolImage == tab.symbolImage {
+                                        Capsule(style: .continuous)
+                                            .fill(Color.primary.opacity(0.12))
+                                            .padding(4)
+                                    }
+                                }
+                                .accessibilityLabel(tab.title)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
-                .frame(height: labelSize.height)
             }
-            
+            .frame(height: 52)
+            .padding(4)
+            .background(TabBarGlassBackground())
+
             if isExpanded {
                 expandedContent
                     .padding()
             }
         }
+        .frame(height: 60)
+        .frame(maxWidth: .infinity)
     }
 }
 
-fileprivate struct TabLabel: View {
-    let symbol: String
-    let title: String
-    let isSelected: Bool
-    let progress: CGFloat
-    let labelSize: CGSize
-    let cornerRadius: CGFloat
-    
+private struct TabBarGlassBackground: View {
     var body: some View {
-        ZStack(alignment: .bottom) {
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .fill(isSelected ? Color.accentColor : Color.gray.opacity(0.2))
-                .frame(width: labelSize.width, height: labelSize.height)
-            
-            VStack(spacing: 4) {
-                Image(systemName: symbol)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 20)
-                    .foregroundColor(isSelected ? Color.white : Color.gray)
-                
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(isSelected ? Color.white : Color.gray)
-            }
+        if #available(iOS 26.0, *) {
+            Color.clear
+                .glassEffect(.regular.interactive(), in: Capsule(style: .continuous))
+        } else {
+            Capsule(style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay {
+                    Capsule(style: .continuous)
+                        .stroke(.white.opacity(0.2), lineWidth: 1)
+                }
         }
     }
 }

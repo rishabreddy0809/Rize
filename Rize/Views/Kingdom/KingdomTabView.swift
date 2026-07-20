@@ -1,20 +1,5 @@
 import SwiftUI
-
-enum KingdomTaskSection: String, CaseIterable {
-    case morning
-    case anytime
-    case evening
-    case queue
-    
-    var title: String {
-        switch self {
-        case .morning: return "Morning"
-        case .anytime: return "Anytime"
-        case .evening: return "Evening"
-        case .queue: return "Queue"
-        }
-    }
-}
+import SwiftData
 
 enum KingdomTab: MorphingTabProtocol, CaseIterable {
     case phoenix

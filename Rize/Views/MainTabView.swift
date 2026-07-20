@@ -15,7 +15,7 @@ enum RizeTab: String, CaseIterable, MorphingTabProtocol {
         }
     }
 
-    var label: String {
+    var title: String {
         switch self {
         case .today: return "Today"
         case .progress: return "Progress"

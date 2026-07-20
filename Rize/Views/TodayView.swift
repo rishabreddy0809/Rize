@@ -17,6 +17,8 @@ struct TodayView: View {
     @State private var showAllDoneBanner = false
     @State private var showGoldBurst = false
     @State private var calendarEvents: [RizeCalendarEvent] = []
+    @State private var currentPlan: DailyPlan? = nil
+    @State private var currentNarrative: CoachingNarrative? = nil
     @State private var showLowEnergyCelebration = false
     @State private var lowEnergyCelebrationXP = 0
     @AppStorage("lowEnergyBonusShownDate") private var lowEnergyBonusShownDate: String = ""
@@ -146,6 +148,9 @@ struct TodayView: View {
                 completedCount: todayEntry?.tasksCompleted ?? 0,
                 energyScore: todayEntry?.energyScore ?? 5
             )
+            if let entry = todayEntry, entry.planGenerated {
+                refreshCoaching(for: entry)
+            }
         }
         #if DEBUG
         .onReceive(NotificationCenter.default.publisher(for: .rizeDebugShowLowEnergyOverlay)) { _ in
@@ -441,6 +446,10 @@ struct TodayView: View {
     @ViewBuilder
     private func taskListSection(entry: DailyEntry) -> some View {
         VStack(spacing: 12) {
+            if let plan = currentPlan, let narrative = currentNarrative {
+                coachingCard(plan: plan, narrative: narrative)
+            }
+
             // Section header
             HStack {
                 Image(systemName: "bolt.fill")
@@ -485,6 +494,99 @@ struct TodayView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(PhoenixPalette.success.opacity(0.3), lineWidth: 1))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
+        }
+    }
+
+    // MARK: - Coaching Card
+
+    @ViewBuilder
+    private func coachingCard(plan: DailyPlan, narrative: CoachingNarrative) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Ryz encouragement
+            HStack(spacing: 8) {
+                Image(systemName: "flame.fill")
+                    .foregroundColor(tierInfo.color)
+                Text("RYZ")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
+                Spacer()
+                if plan.burnoutRisk != .low {
+                    Label(plan.burnoutRisk == .high ? "Protect your energy" : "Ease in",
+                          systemImage: "shield.lefthalf.filled")
+                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                        .foregroundColor(PhoenixPalette.destructive.opacity(0.9))
+                }
+            }
+
+            Text(narrative.encouragement)
+                .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                .foregroundColor(PhoenixPalette.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(narrative.explanation)
+                .font(.system(.caption, design: .rounded))
+                .foregroundColor(PhoenixPalette.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            // Decision chips
+            HStack(spacing: 8) {
+                coachingChip(icon: "gauge.with.dots.needle.33percent", text: workloadLabel(plan.workload))
+                coachingChip(icon: "figure.run", text: workoutLabel(plan.workout.intent))
+                if plan.recovery.emphasis != .none {
+                    coachingChip(icon: "moon.zzz.fill", text: "Recover")
+                }
+            }
+
+            // Body note + phoenix line
+            Text(narrative.bodyNote)
+                .font(.system(.caption, design: .rounded))
+                .foregroundColor(PhoenixPalette.textPrimary.opacity(0.85))
+                .fixedSize(horizontal: false, vertical: true)
+
+            HStack(spacing: 6) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 10))
+                    .foregroundColor(tierInfo.color.opacity(0.8))
+                Text(narrative.phoenixMessage)
+                    .font(.system(size: 11, design: .rounded))
+                    .italic()
+                    .foregroundColor(PhoenixPalette.textSecondary.opacity(0.8))
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .kingdomGlass(cornerRadius: 18)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Coaching. \(narrative.encouragement). \(narrative.explanation). \(narrative.bodyNote)")
+    }
+
+    private func coachingChip(icon: String, text: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: icon).font(.system(size: 9))
+            Text(text).font(.system(size: 10, weight: .semibold, design: .monospaced))
+        }
+        .foregroundColor(tierInfo.color)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(tierInfo.color.opacity(0.12))
+        .clipShape(Capsule())
+    }
+
+    private func workloadLabel(_ w: Workload) -> String {
+        switch w {
+        case .light: return "Light day"
+        case .moderate: return "Balanced"
+        case .heavy: return "Full day"
+        }
+    }
+
+    private func workoutLabel(_ i: WorkoutIntent) -> String {
+        switch i {
+        case .rest: return "Rest"
+        case .recovery: return "Recovery"
+        case .light: return "Light"
+        case .moderate: return "Moderate"
+        case .ambitious: return "Ambitious"
         }
     }
 
@@ -600,66 +702,99 @@ struct TodayView: View {
         setEnergy(energy, entry: entry)
     }
 
+    /// The Rize planning pipeline:
+    /// Tasks → HealthKit → Strava → PlanningEngine → DailyPlan → Task list +
+    /// Foundation Models narration. The engine makes every decision; the model
+    /// only explains it. Tasks appear immediately; coaching prose fills in when
+    /// the on-device model responds (or instantly via the template fallback).
+    @MainActor
     private func generatePlan(entry: DailyEntry) {
         guard let profile = profile, profile.canGeneratePlan else { return }
         isGenerating = true
+        let energy = entry.energyScore ?? 5
 
-        Task {
-            let health = HealthKitManager.shared
-            let calendar = CalendarManager.shared
-            let calContext = calendar.promptContext(for: calendarEvents)
+        Task { @MainActor in
+            let plan = makeDailyPlan(energy: energy, profile: profile)
+            let activities = TaskFactory.activities(for: plan)
 
-            do {
-                let tasks = try await ClaudeService.shared.generateDailyPlan(
-                    energyScore: entry.energyScore ?? 5,
-                    goal: profile.goal,
-                    goalDetail: profile.goalDetail,
-                    sleepHours: health.sleepHours,
-                    restingHeartRate: health.restingHeartRate,
-                    stepCount: health.stepCount,
-                    activeEnergy: health.activeEnergy,
-                    calendarEvents: calContext,
-                    calendarEnabled: profile.calendarEnabled
+            // Persist the actionable tasks and show them right away.
+            for activity in activities {
+                let rt = RizeTask(
+                    title: activity.title,
+                    duration: activity.duration,
+                    taskDescription: activity.detail,
+                    type: activity.category.rawValue
                 )
-                await MainActor.run {
-                    for task in tasks {
-                        let rt = RizeTask(
-                            title: task.title,
-                            duration: task.duration,
-                            taskDescription: task.description,
-                            type: task.type
-                        )
-                        rt.entry = entry
-                        modelContext.insert(rt)
-                        entry.tasks.append(rt)
-                    }
-                    entry.totalTasksForDay = tasks.count
-                    entry.planGenerated = true
-                    profile.recordPlanGenerated()
-                    try? modelContext.save()
-                    isGenerating = false
-                }
-            } catch {
-                await MainActor.run {
-                    let fallback = ClaudeService.shared.fallbackTasks(energyScore: entry.energyScore ?? 5, calendarEvents: calendarEvents)
-                    for task in fallback {
-                        let rt = RizeTask(
-                            title: task.title,
-                            duration: task.duration,
-                            taskDescription: task.description,
-                            type: task.type
-                        )
-                        rt.entry = entry
-                        modelContext.insert(rt)
-                        entry.tasks.append(rt)
-                    }
-                    entry.totalTasksForDay = fallback.count
-                    entry.planGenerated = true
-                    profile.recordPlanGenerated()
-                    try? modelContext.save()
-                    isGenerating = false
-                }
+                rt.entry = entry
+                modelContext.insert(rt)
+                entry.tasks.append(rt)
             }
+            entry.totalTasksForDay = activities.count
+            entry.planGenerated = true
+            profile.recordPlanGenerated()
+            try? modelContext.save()
+
+            currentPlan = plan
+            currentNarrative = CoachingNarrator.template(for: plan, context: coachingContext(profile))
+            isGenerating = false
+
+            // Upgrade the coaching copy with on-device Foundation Models when ready.
+            let narrative = await CoachingNarrator.shared.narrate(plan: plan, context: coachingContext(profile))
+            currentNarrative = narrative
+        }
+    }
+
+    /// Assemble the deterministic `PlanInput` from all available signals and run
+    /// the engine. Pure and fast — safe to call on the main actor.
+    @MainActor
+    private func makeDailyPlan(energy: Int, profile: UserProfile) -> DailyPlan {
+        let snapshot = HealthKitManager.shared.snapshot
+
+        let planningEvents = calendarEvents.map {
+            PlanningCalendarEvent(title: $0.title, date: $0.date, isAcademic: $0.mustPlanToday)
+        }
+        // Calendar deadlines are the engine's task inputs today (Rize has no
+        // separate to-do list yet — that's a future surface).
+        let planningTasks = calendarEvents.map {
+            PlanningTask(
+                title: $0.title,
+                priority: $0.isUrgent ? .high : .medium,
+                dueDate: $0.date,
+                category: .work
+            )
+        }
+
+        let input = PlanInput(
+            referenceDate: Date(),
+            energy: energy,
+            tasks: planningTasks,
+            calendarEvents: planningEvents,
+            sleep: snapshot.sleep,
+            recentWorkouts: snapshot.recentWorkouts,
+            goals: profile.goalDetail,
+            currentStreak: profile.currentStreak,
+            previousPlan: currentPlan
+        )
+
+        return PlanningEngine().makePlan(from: input)
+    }
+
+    private func coachingContext(_ profile: UserProfile) -> CoachingContext {
+        CoachingContext(name: profile.name, goal: profile.goal, goalDetail: profile.goalDetail)
+    }
+
+    /// Recompute the (deterministic) plan and refresh coaching copy for an
+    /// already-generated day, so the coaching card survives app relaunches.
+    @MainActor
+    private func refreshCoaching(for entry: DailyEntry) {
+        guard entry.planGenerated, let profile = profile else { return }
+        let plan = makeDailyPlan(energy: entry.energyScore ?? 5, profile: profile)
+        currentPlan = plan
+        if currentNarrative == nil {
+            currentNarrative = CoachingNarrator.template(for: plan, context: coachingContext(profile))
+        }
+        Task { @MainActor in
+            currentNarrative = await CoachingNarrator.shared.narrate(plan: plan, context: coachingContext(profile))
         }
     }
 

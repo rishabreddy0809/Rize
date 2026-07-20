@@ -1,17 +1,13 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.9
 import PackageDescription
 
+// NOTE: Rize ships as an Xcode app target (Rize.xcodeproj). This manifest is
+// kept only for tooling that expects a package root. The app has NO external
+// dependencies — planning is deterministic and all AI is Apple's on-device
+// Foundation Models framework (system SDK, not a package).
 let package = Package(
     name: "Rize",
-    dependencies: [
-        .package(url: "https://github.com/apple/coremltools", from: "2.0.0")
-    ],
     targets: [
-        .target(
-            name: "Rize",
-            dependencies: [
-                .product(name: "CoreML", package: "coremltools")
-            ]
-        ),
+        .target(name: "Rize")
     ]
 )

@@ -1,30 +1,37 @@
 import SwiftUI
 
 struct StravaTabView: View {
-    @State private var isStravaConnected = false
-    @State private var workouts: [Workout] = []
-    
+    @ObservedObject private var strava = StravaManager.shared
+    @State private var errorMessage: String?
+
     var body: some View {
         VStack {
-            if isStravaConnected {
-                List(workouts) { workout in
-                    HStack {
-                        Text(workout.name)
-                            .font(.headline)
-                        
-                        Spacer()
-                        
-                        Text("\(workout.distance, specifier: "%.2f") km")
-                            .font(.subheadline)
+            if strava.isConnected {
+                if strava.recentWorkouts.isEmpty {
+                    Text("No recent workouts.")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding()
+                } else {
+                    List(strava.recentWorkouts) { workout in
+                        HStack {
+                            Text(workout.type)
+                                .font(.headline)
+
+                            Spacer()
+
+                            Text("\(workout.distanceKilometers, specifier: "%.2f") km")
+                                .font(.subheadline)
+                        }
+                        .padding()
                     }
-                    .padding()
                 }
             } else {
-                Button(action: connectToStrava) {
+                Button(action: { strava.connect() }) {
                     HStack {
                         Image(systemName: "plus.circle.fill")
                             .foregroundColor(.blue)
-                        
+
                         Text("Connect to Strava")
                             .foregroundColor(.blue)
                     }
@@ -33,18 +40,27 @@ struct StravaTabView: View {
                     .cornerRadius(10)
                     .shadow(radius: 5)
                 }
+
+                if !StravaConfig.isConfigured {
+                    Text("Add your Strava API credentials to enable this.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 8)
+                }
+            }
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding(.top, 8)
             }
         }
         .navigationTitle("Strava")
+        .task {
+            guard strava.isConnected else { return }
+            do { try await strava.loadRecentWorkouts() }
+            catch { errorMessage = error.localizedDescription }
+        }
     }
-    
-    private func connectToStrava() {
-        StravaManager.shared.connectToStrava()
-    }
-}
-
-struct Workout: Identifiable {
-    let id = UUID()
-    let name: String
-    let distance: Double
 }

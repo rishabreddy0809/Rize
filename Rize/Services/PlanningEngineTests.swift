@@ -1,207 +1,140 @@
 import XCTest
 @testable import Rize
 
-class PlanningEngineTests: XCTestCase {
-    
-    func testEnergy2Sleep4OverdueAssignment() {
-        let tasks = [
-            RizeTask(taskDescription: "Task 1", dueDate: Calendar.current.date(byAdding: .day, value: -1, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 2", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil)
-        ]
-        
-        let plan = PlanningEngine.shared.generateDailyPlan(
-            energyLevel: 2,
-            mood: "",
-            tasks: tasks,
-            taskDueDates: [],
-            taskPriorities: [.high, .medium, .low],
-            calendarEvents: [],
-            sleepData: 4.0,
-            stravaWorkouts: nil,
-            currentStreak: 1,
-            userGoals: ""
-        )
-        
-        XCTAssertEqual(plan.recommendedTasks.count, 2)
-        XCTAssertEqual(plan.postponedTasks.count, 0)
-        XCTAssertEqual(plan.workoutRecommendation, "Optional light workout")
-        XCTAssertEqual(plan.restRecommendation, "Rest or a very light workout")
+/// Unit tests for the deterministic `PlanningEngine`.
+///
+/// NOTE: These require a Unit Testing bundle target. This project's Xcode
+/// project is hand-maintained and currently has no test target, so this file is
+/// intentionally **not** compiled into the app target. To run:
+/// Xcode ▸ File ▸ New ▸ Target ▸ Unit Testing Bundle, then add this file to it.
+///
+/// The same scenarios are also verified headless via `swiftc` during
+/// development (see the engine verification harness), so the engine's behaviour
+/// is exercised even before the test target exists.
+final class PlanningEngineTests: XCTestCase {
+
+    private let engine = PlanningEngine()
+
+    /// Fixed calendar + reference date so day math is deterministic.
+    private lazy var calendar: Calendar = {
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "UTC")!
+        return cal
+    }()
+
+    private lazy var now: Date = {
+        calendar.date(from: DateComponents(year: 2026, month: 7, day: 20, hour: 12))!
+    }()
+
+    private func day(_ offset: Int) -> Date {
+        calendar.date(byAdding: .day, value: offset, to: now)!
     }
-    
-    func testEnergy9Sleep9NoDeadlines() {
-        let tasks = [
-            RizeTask(taskDescription: "Task 1", dueDate: Calendar.current.date(byAdding: .day, value: 2, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 2", dueDate: Calendar.current.date(byAdding: .day, value: 3, to: Date()), completedAt: nil)
-        ]
-        
-        let plan = PlanningEngine.shared.generateDailyPlan(
-            energyLevel: 9,
-            mood: "",
-            tasks: tasks,
-            taskDueDates: [],
-            taskPriorities: [.high, .medium, .low],
-            calendarEvents: [],
-            sleepData: 9.0,
-            stravaWorkouts: nil,
-            currentStreak: 1,
-            userGoals: ""
-        )
-        
-        XCTAssertEqual(plan.recommendedTasks.count, 3)
-        XCTAssertEqual(plan.postponedTasks.count, 0)
-        XCTAssertEqual(plan.workoutRecommendation, "Optional ambitious workout")
-        XCTAssertEqual(plan.restRecommendation, "Complete today's tasks and get ahead on upcoming work")
+
+    private func task(_ title: String, _ priority: TaskPriority = .medium, due: Int? = nil, done: Bool = false) -> PlanningTask {
+        PlanningTask(title: title, priority: priority, dueDate: due.map(day), isCompleted: done)
     }
-    
-    func testEnergy5IntenseRunYesterday() {
-        let tasks = [
-            RizeTask(taskDescription: "Task 1", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 2", dueDate: Calendar.current.date(byAdding: .day, value: 1, to: Date()), completedAt: nil)
-        ]
-        
-        let stravaWorkouts = [
-            Workout(distance: 15.0) // Intense run
-        ]
-        
-        let plan = PlanningEngine.shared.generateDailyPlan(
-            energyLevel: 5,
-            mood: "",
+
+    private func input(
+        energy: Int,
+        tasks: [PlanningTask] = [],
+        sleep: Double? = nil,
+        workouts: [WorkoutSummary] = [],
+        streak: Int = 1
+    ) -> PlanInput {
+        PlanInput(
+            referenceDate: now,
+            energy: energy,
             tasks: tasks,
-            taskDueDates: [],
-            taskPriorities: [.high, .medium, .low],
-            calendarEvents: [],
-            sleepData: nil,
-            stravaWorkouts: stravaWorkouts,
-            currentStreak: 1,
-            userGoals: ""
+            sleep: sleep.map { SleepSummary(hours: $0) },
+            recentWorkouts: workouts,
+            currentStreak: streak,
+            calendar: calendar
         )
-        
-        XCTAssertEqual(plan.recommendedTasks.count, 3)
-        XCTAssertEqual(plan.postponedTasks.count, 0)
-        XCTAssertEqual(plan.workoutRecommendation, "Optional light workout for consistency")
-        XCTAssertEqual(plan.restRecommendation, "Recover from intense workout")
     }
-    
-    func testEnergy10PoorSleep() {
-        let tasks = [
-            RizeTask(taskDescription: "Task 1", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 2", dueDate: Calendar.current.date(byAdding: .day, value: 1, to: Date()), completedAt: nil)
-        ]
-        
-        let plan = PlanningEngine.shared.generateDailyPlan(
-            energyLevel: 10,
-            mood: "",
-            tasks: tasks,
-            taskDueDates: [],
-            taskPriorities: [.high, .medium, .low],
-            calendarEvents: [],
-            sleepData: 3.0,
-            stravaWorkouts: nil,
-            currentStreak: 1,
-            userGoals: ""
-        )
-        
-        XCTAssertEqual(plan.recommendedTasks.count, 6)
-        XCTAssertEqual(plan.postponedTasks.count, 0)
-        XCTAssertEqual(plan.workoutRecommendation, "Optional ambitious workout")
-        XCTAssertEqual(plan.restRecommendation, "Complete today's tasks and get ahead on upcoming work")
+
+    // MARK: - Energy + Sleep
+
+    func testDepletedEnergyPoorSleepProtectsUser() {
+        let plan = engine.makePlan(from: input(
+            energy: 2,
+            tasks: [task("Overdue", .high, due: -1), task("Today", .high, due: 0), task("Next week", .low, due: 5)],
+            sleep: 4
+        ))
+        XCTAssertEqual(plan.workload, .light)
+        XCTAssertEqual(plan.workout.intent, .rest)
+        XCTAssertEqual(plan.recovery.emphasis, .prioritized)
+        XCTAssertEqual(plan.burnoutRisk, .high)
+        // Mandatory deadlines are never postponed, even when depleted.
+        XCTAssertTrue(plan.recommendedTasks.contains { $0.deadline == .overdue })
+        XCTAssertTrue(plan.recommendedTasks.contains { $0.deadline == .today })
+        // Optional far-out work is deferred.
+        XCTAssertTrue(plan.deferredTasks.contains { $0.title == "Next week" })
     }
-    
-    func testEnergy3FiveTasksDueToday() {
-        let tasks = [
-            RizeTask(taskDescription: "Task 1", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 2", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 3", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 4", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 5", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil)
-        ]
-        
-        let plan = PlanningEngine.shared.generateDailyPlan(
-            energyLevel: 3,
-            mood: "",
-            tasks: tasks,
-            taskDueDates: [],
-            taskPriorities: [.high, .medium, .low],
-            calendarEvents: [],
-            sleepData: nil,
-            stravaWorkouts: nil,
-            currentStreak: 1,
-            userGoals: ""
-        )
-        
-        XCTAssertEqual(plan.recommendedTasks.count, 2)
-        XCTAssertEqual(plan.postponedTasks.count, 3)
-        XCTAssertEqual(plan.workoutRecommendation, "Optional light workout")
-        XCTAssertEqual(plan.restRecommendation, "Rest or a very light workout")
+
+    func testHighEnergyAmpleSleepAllowsGettingAhead() {
+        let plan = engine.makePlan(from: input(
+            energy: 9,
+            tasks: [task("Soon", .high, due: 2), task("Later", .medium, due: 3), task("Far", .low, due: 6)],
+            sleep: 9
+        ))
+        XCTAssertEqual(plan.workload, .heavy)
+        XCTAssertEqual(plan.workout.intent, .ambitious)
+        XCTAssertEqual(plan.burnoutRisk, .low)
+        XCTAssertGreaterThanOrEqual(plan.recommendedTasks.count, 1)
+        XCTAssertLessThanOrEqual(plan.recommendedTasks.count, 5) // high-band capacity
     }
-    
-    func testEmptyTaskList() {
-        let plan = PlanningEngine.shared.generateDailyPlan(
-            energyLevel: 5,
-            mood: "",
-            tasks: [],
-            taskDueDates: [],
-            taskPriorities: [.high, .medium, .low],
-            calendarEvents: [],
-            sleepData: nil,
-            stravaWorkouts: nil,
-            currentStreak: 1,
-            userGoals: ""
-        )
-        
-        XCTAssertEqual(plan.recommendedTasks.count, 0)
-        XCTAssertEqual(plan.postponedTasks.count, 0)
-        XCTAssertEqual(plan.workoutRecommendation, "Optional light workout for consistency")
-        XCTAssertEqual(plan.restRecommendation, "Complete today's tasks and manage workload")
+
+    // MARK: - Workouts
+
+    func testHardWorkoutYesterdayTriggersRecovery() {
+        let hardRun = WorkoutSummary(type: "Run", startDate: day(-1), distanceMeters: 15000, movingTime: 5400, source: .strava)
+        let plan = engine.makePlan(from: input(
+            energy: 5,
+            tasks: [task("A", .high, due: 0), task("B", .medium, due: 1)],
+            workouts: [hardRun]
+        ))
+        XCTAssertEqual(plan.workout.intent, .recovery)
+        XCTAssertEqual(plan.workload, .moderate)
+        XCTAssertEqual(plan.recovery.emphasis, .encouraged)
     }
-    
-    func testNoHealthKitData() {
-        let tasks = [
-            RizeTask(taskDescription: "Task 1", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 2", dueDate: Calendar.current.date(byAdding: .day, value: 1, to: Date()), completedAt: nil)
-        ]
-        
-        let plan = PlanningEngine.shared.generateDailyPlan(
-            energyLevel: 5,
-            mood: "",
-            tasks: tasks,
-            taskDueDates: [],
-            taskPriorities: [.high, .medium, .low],
-            calendarEvents: [],
-            sleepData: nil,
-            stravaWorkouts: nil,
-            currentStreak: 1,
-            userGoals: ""
-        )
-        
-        XCTAssertEqual(plan.recommendedTasks.count, 3)
-        XCTAssertEqual(plan.postponedTasks.count, 0)
-        XCTAssertEqual(plan.workoutRecommendation, "Optional light workout for consistency")
-        XCTAssertEqual(plan.restRecommendation, "Complete today's tasks and manage workload")
+
+    func testNoRecentWorkoutsEncouragesConsistency() {
+        let plan = engine.makePlan(from: input(energy: 6))
+        XCTAssertTrue(plan.workout.rationale.contains(.noRecentWorkouts))
+        XCTAssertEqual(plan.workout.intent, .moderate)
     }
-    
-    func testNoStravaData() {
-        let tasks = [
-            RizeTask(taskDescription: "Task 1", dueDate: Calendar.current.date(byAdding: .day, value: 0, to: Date()), completedAt: nil),
-            RizeTask(taskDescription: "Task 2", dueDate: Calendar.current.date(byAdding: .day, value: 1, to: Date()), completedAt: nil)
-        ]
-        
-        let plan = PlanningEngine.shared.generateDailyPlan(
-            energyLevel: 5,
-            mood: "",
-            tasks: tasks,
-            taskDueDates: [],
-            taskPriorities: [.high, .medium, .low],
-            calendarEvents: [],
-            sleepData: nil,
-            stravaWorkouts: nil,
-            currentStreak: 1,
-            userGoals: ""
-        )
-        
-        XCTAssertEqual(plan.recommendedTasks.count, 3)
-        XCTAssertEqual(plan.postponedTasks.count, 0)
-        XCTAssertEqual(plan.workoutRecommendation, "Optional light workout for consistency")
-        XCTAssertEqual(plan.restRecommendation, "Complete today's tasks and manage workload")
+
+    // MARK: - Edge Cases
+
+    func testEmptyTaskListIsSafe() {
+        let plan = engine.makePlan(from: input(energy: 5))
+        XCTAssertTrue(plan.recommendedTasks.isEmpty)
+        XCTAssertTrue(plan.deferredTasks.isEmpty)
+        XCTAssertLessThan(plan.confidence, 0.7) // little signal → lower confidence
+    }
+
+    func testLowEnergyNeverOverloadsWithFarFutureWork() {
+        let many = (1...6).map { task("Future \($0)", .medium, due: $0 + 2) }
+        let plan = engine.makePlan(from: input(energy: 3, tasks: many))
+        XCTAssertLessThanOrEqual(plan.recommendedTasks.count, 3) // low-band capacity
+        XCTAssertFalse(plan.recommendedTasks.contains { $0.deadline == .later })
+    }
+
+    func testCompletedTasksAreIgnored() {
+        let plan = engine.makePlan(from: input(
+            energy: 7,
+            tasks: [task("Done", .high, due: 0, done: true), task("Open", .high, due: 0)]
+        ))
+        XCTAssertEqual(plan.recommendedTasks.count, 1)
+        XCTAssertEqual(plan.recommendedTasks.first?.title, "Open")
+    }
+
+    // MARK: - Determinism
+
+    func testDeterministicForIdenticalInput() {
+        let tasks = [task("X", .high, due: 0), task("Y", .low, due: 4)]
+        let a = engine.makePlan(from: input(energy: 7, tasks: tasks, sleep: 7))
+        let b = engine.makePlan(from: input(energy: 7, tasks: tasks, sleep: 7))
+        XCTAssertEqual(a, b)
     }
 }
