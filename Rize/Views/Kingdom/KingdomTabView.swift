@@ -191,7 +191,7 @@ struct PhoenixView: View {
                 divider
                 statItem(icon: "crown.fill", value: "\(profile?.bestStreak ?? 0)", label: "BEST", color: PhoenixPalette.radiant)
                 divider
-                statItem(icon: "dollarsign.circle.fill", value: "\(xpManager.gold)", label: "GOLD", color: PhoenixPalette.eternal)
+                statItem(icon: "shield.fill", value: "\(xpManager.realmDefense)%", label: "DEFENSE", color: KingdomDesign.defenseBarColor(xpManager.realmDefense))
             }
         }
         .padding(16)
