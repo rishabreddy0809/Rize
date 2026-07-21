@@ -42,7 +42,7 @@ struct KingdomTabView: View {
                     .environmentObject(XPManager.shared)
                     .environmentObject(AchievementManager.shared)
             case .strava:
-                StravaTabView()
+                StravaView()  // Add this line
             }
         }
     }
@@ -383,5 +383,13 @@ struct TaskRow: View {
         .padding(8)
         .background(Color.white.opacity(0.06))
         .cornerRadius(8)
+    }
+}
+
+struct StravaView: View {
+    var body: some View {
+        Text("Strava")
+            .font(.largeTitle)
+            .foregroundColor(.primary)
     }
 }
