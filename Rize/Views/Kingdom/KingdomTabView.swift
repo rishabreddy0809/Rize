@@ -340,19 +340,19 @@ struct TasksView: View {
             // Tasks view content
             Section(header: Text("Workblock")) {
                 ForEach(CalendarManager.shared.upcomingEvents.filter { $0.isDueSoon }) { event in
-                    TaskRow(event: event)
+                    TaskRow(event: event, task: nil)
                 }
             }
             
             Section(header: Text("Recommended Tasks")) {
                 ForEach(xpManager.dailyPlan.recommendedTasks) { task in
-                    TaskRow(task: task)
+                    TaskRow(event: nil, task: task)
                 }
             }
             
             Section(header: Text("Deferred Tasks")) {
                 ForEach(xpManager.dailyPlan.deferredTasks) { task in
-                    TaskRow(task: task)
+                    TaskRow(event: nil, task: task)
                 }
             }
         }
