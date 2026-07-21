@@ -122,9 +122,13 @@ struct TodayView: View {
                     .allowsHitTesting(false)
             }
 
-            // Achievement banner
+            // Achievement celebration (full-screen, Duolingo-style)
             if let achievement = achievementManager.recentlyUnlocked {
-                achievementBanner(achievement)
+                AchievementUnlockedView(achievement: achievement) {
+                    achievementManager.recentlyUnlocked = nil
+                }
+                .transition(.opacity)
+                .zIndex(20)
             }
 
             // Siege broken banner
@@ -156,6 +160,11 @@ struct TodayView: View {
         .onReceive(NotificationCenter.default.publisher(for: .rizeDebugShowLowEnergyOverlay)) { _ in
             lowEnergyCelebrationXP = 50
             withAnimation(Constants.springAnimation) { showLowEnergyCelebration = true }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .rizeDebugShowAchievement)) { _ in
+            withAnimation(.easeOut(duration: 0.3)) {
+                achievementManager.recentlyUnlocked = AchievementManager.all[6] // UNSTOPPABLE
+            }
         }
         #endif
     }
@@ -286,35 +295,24 @@ struct TodayView: View {
 
                 // Vitality row — pushed down below the phoenix's square stage
                 // at Tier 5 so the sprite never overlaps the bars.
-                HStack(spacing: 16) {
-                    VStack(spacing: 4) {
-                        Text("PHOENIX VITALITY")
-                            .font(.system(size: 9, design: .monospaced))
-                            .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
-                        GeometryReader { geo in
-                            ZStack(alignment: .leading) {
-                                RoundedRectangle(cornerRadius: 3)
-                                    .fill(Color.white.opacity(0.06))
-                                RoundedRectangle(cornerRadius: 3)
-                                    .fill(KingdomDesign.defenseBarColor(xpManager.realmDefense))
-                                    .frame(width: geo.size.width * Double(xpManager.realmDefense) / 100.0)
-                                    .animation(Constants.springAnimation, value: xpManager.realmDefense)
-                            }
+                VStack(spacing: 4) {
+                    Text("PHOENIX VITALITY")
+                        .font(.system(size: 9, design: .monospaced))
+                        .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Color.white.opacity(0.06))
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(KingdomDesign.defenseBarColor(xpManager.realmDefense))
+                                .frame(width: geo.size.width * Double(xpManager.realmDefense) / 100.0)
+                                .animation(Constants.springAnimation, value: xpManager.realmDefense)
                         }
-                        .frame(height: 5)
-                        Text("\(xpManager.realmDefense)%")
-                            .font(.system(size: 10, weight: .bold, design: .monospaced))
-                            .foregroundColor(KingdomDesign.defenseBarColor(xpManager.realmDefense))
                     }
-
-                    Divider().background(Color.white.opacity(0.1)).frame(height: 30)
-
-                    HStack(spacing: 4) {
-                        Text("💰")
-                        Text("\(xpManager.gold)")
-                            .font(.system(.subheadline, design: .monospaced, weight: .bold))
-                            .foregroundColor(PhoenixPalette.eternal)
-                    }
+                    .frame(height: 5)
+                    Text("\(xpManager.realmDefense)%")
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .foregroundColor(KingdomDesign.defenseBarColor(xpManager.realmDefense))
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, showPhoenix ? 80 : 0)
@@ -470,13 +468,19 @@ struct TodayView: View {
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
                     .padding()
             } else {
-                ForEach(entry.tasks) { task in
-                    TaskRowView(
-                        task: task,
-                        tierColor: tierInfo.color
-                    ) {
-                        completeTask(task, entry: entry)
+                ForEach(groupedTasks(entry.tasks)) { group in
+                    VStack(alignment: .leading, spacing: 10) {
+                        groupHeader(group)
+                        ForEach(group.tasks) { task in
+                            TaskRowView(
+                                task: task,
+                                tierColor: tierInfo.color
+                            ) {
+                                completeTask(task, entry: entry)
+                            }
+                        }
                     }
+                    .padding(.top, 4)
                 }
             }
 
@@ -494,6 +498,72 @@ struct TodayView: View {
                 .overlay(RoundedRectangle(cornerRadius: 14).stroke(PhoenixPalette.success.opacity(0.3), lineWidth: 1))
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
+        }
+    }
+
+    // MARK: - Task Grouping
+
+    /// A display section in the plan. Goal tasks group under their flexible,
+    /// goal-derived label ("Marathon Base"); calendar events fall back to their
+    /// fixed `PlanCategory` bucket. Icon/colour come from the task's category.
+    struct TaskGroup: Identifiable {
+        let id: String
+        let title: String
+        let icon: String
+        let color: Color
+        let sortOrder: Int
+        var tasks: [RizeTask]
+    }
+
+    /// Group the day's tasks: goal tasks first (under their focus label), then
+    /// calendar categories. Each group's tasks are sorted (incomplete first,
+    /// then by scheduled time).
+    private func groupedTasks(_ tasks: [RizeTask]) -> [TaskGroup] {
+        Dictionary(grouping: tasks) { groupKey(for: $0) }
+            .map { key, value -> TaskGroup in
+                let sample = value[0]
+                let category = PlanCategory.from(taskType: sample.type)
+                let isGoal = sample.sectionLabel?.isEmpty == false
+                return TaskGroup(
+                    id: key,
+                    title: sample.sectionLabel?.isEmpty == false ? sample.sectionLabel! : category.title,
+                    icon: category.icon,
+                    color: category.color,
+                    // Goal tasks lead the list; calendar buckets follow in their order.
+                    sortOrder: isGoal ? -1 : category.sortOrder,
+                    tasks: value.sorted(by: taskSort)
+                )
+            }
+            .sorted { ($0.sortOrder, $0.title) < ($1.sortOrder, $1.title) }
+    }
+
+    private func groupKey(for task: RizeTask) -> String {
+        if let label = task.sectionLabel, !label.isEmpty { return "goal:\(label)" }
+        return "cat:\(PlanCategory.from(taskType: task.type).rawValue)"
+    }
+
+    private func taskSort(_ a: RizeTask, _ b: RizeTask) -> Bool {
+        if a.completed != b.completed { return !a.completed } // incomplete first
+        switch (a.dueDate, b.dueDate) {
+        case let (x?, y?): return x < y
+        case (_?, nil):    return true
+        case (nil, _?):    return false
+        case (nil, nil):   return a.title < b.title
+        }
+    }
+
+    private func groupHeader(_ group: TaskGroup) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: group.icon)
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(group.color)
+            Text(group.title.uppercased())
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundColor(group.color)
+            Spacer()
+            Text("\(group.tasks.count)")
+                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .foregroundColor(group.color.opacity(0.6))
         }
     }
 
@@ -651,35 +721,6 @@ struct TodayView: View {
         .transition(.move(edge: .top).combined(with: .opacity))
     }
 
-    @ViewBuilder
-    private func achievementBanner(_ def: AchievementDefinition) -> some View {
-        VStack {
-            HStack(spacing: 12) {
-                Image(systemName: def.icon)
-                    .foregroundColor(def.color)
-                    .font(.title3)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("ACHIEVEMENT UNLOCKED")
-                        .font(.system(size: 9, weight: .bold, design: .monospaced))
-                        .foregroundColor(def.color.opacity(0.7))
-                    Text(def.title)
-                        .font(.system(.caption, design: .monospaced, weight: .bold))
-                        .foregroundColor(PhoenixPalette.textPrimary)
-                }
-                Spacer()
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(def.color.opacity(0.1))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(def.color.opacity(0.3), lineWidth: 1))
-            .clipShape(RoundedRectangle(cornerRadius: 14))
-            .padding(.horizontal, 16)
-            .padding(.top, 50)
-            Spacer()
-        }
-        .transition(.move(edge: .top).combined(with: .opacity))
-    }
-
     // MARK: - Actions
 
     private func setEnergy(_ energy: Int, entry: DailyEntry) {
@@ -715,21 +756,49 @@ struct TodayView: View {
 
         Task { @MainActor in
             let plan = makeDailyPlan(energy: energy, profile: profile)
-            let activities = TaskFactory.activities(for: plan)
 
-            // Persist the actionable tasks and show them right away.
-            for activity in activities {
+            // Goal-specific tasks, written on-device by Foundation Models and
+            // grounded in the engine's decision for today (intensity/workload).
+            // Nothing generic — the tasks always serve the user's stated goal.
+            let goalTasks = await GoalTaskGenerator.tasks(for: plan, context: coachingContext(profile))
+
+            // Clear any previously generated tasks so regenerating doesn't
+            // stack duplicates.
+            for old in entry.tasks { modelContext.delete(old) }
+            entry.tasks.removeAll()
+            entry.tasksCompleted = 0
+
+            for activity in goalTasks {
                 let rt = RizeTask(
                     title: activity.title,
                     duration: activity.duration,
                     taskDescription: activity.detail,
-                    type: activity.category.rawValue
+                    type: activity.category.rawValue,
+                    sectionLabel: activity.focus
                 )
                 rt.entry = entry
                 modelContext.insert(rt)
                 entry.tasks.append(rt)
             }
-            entry.totalTasksForDay = activities.count
+
+            // Real scheduled tasks pulled from the user's calendar (EventKit),
+            // classified into workout / class / work / personal buckets.
+            await CalendarManager.shared.fetchTodaysEvents()
+            for event in CalendarManager.shared.todaysEvents {
+                let rt = RizeTask(
+                    title: event.title,
+                    duration: TodayView.timeLabel(for: event.date),
+                    taskDescription: "From your calendar",
+                    type: event.category.rawValue,
+                    priority: event.mustPlanToday ? .high : .medium,
+                    dueDate: event.date
+                )
+                rt.entry = entry
+                modelContext.insert(rt)
+                entry.tasks.append(rt)
+            }
+
+            entry.totalTasksForDay = entry.tasks.count
             entry.planGenerated = true
             profile.recordPlanGenerated()
             try? modelContext.save()
@@ -872,6 +941,7 @@ struct TodayView: View {
         calendarEvents = CalendarManager.shared.upcomingEvents
         Task {
             await CalendarManager.shared.fetchUpcomingEvents()
+            await CalendarManager.shared.fetchTodaysEvents()
             calendarEvents = CalendarManager.shared.upcomingEvents
         }
     }
@@ -881,6 +951,17 @@ struct TodayView: View {
         f.dateFormat = "yyyy-MM-dd"
         return f
     }()
+
+    private static let timeFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        return f
+    }()
+
+    /// A short start-time label ("9:00 AM") used as a calendar task's subtitle.
+    static func timeLabel(for date: Date) -> String {
+        timeFormatter.string(from: date)
+    }
 
     private static var todayDateString: String {
         dayFormatter.string(from: Date())
@@ -1059,8 +1140,8 @@ struct TaskRowView: View {
 
     @State private var bouncing = false
 
-    private var section: KingdomTaskSection {
-        KingdomTaskSection.from(taskType: task.type)
+    private var category: PlanCategory {
+        PlanCategory.from(taskType: task.type)
     }
 
     var body: some View {
@@ -1068,11 +1149,11 @@ struct TaskRowView: View {
             // Icon
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(KingdomDesign.sectionColor(section).opacity(0.15))
+                    .fill(category.color.opacity(0.15))
                     .frame(width: 40, height: 40)
-                Image(systemName: section.icon)
+                Image(systemName: category.icon)
                     .font(.system(size: 16))
-                    .foregroundColor(KingdomDesign.sectionColor(section))
+                    .foregroundColor(category.color)
             }
 
             // Title + duration
@@ -1100,14 +1181,14 @@ struct TaskRowView: View {
                 ZStack {
                     Circle()
                         .strokeBorder(
-                            task.completed ? KingdomDesign.sectionColor(section) : Color.white.opacity(0.2),
+                            task.completed ? category.color : Color.white.opacity(0.2),
                             lineWidth: 2
                         )
                         .frame(width: 26, height: 26)
                         .background(
                             Circle().fill(
                                 task.completed
-                                    ? KingdomDesign.sectionColor(section)
+                                    ? category.color
                                     : Color.clear
                             )
                         )
