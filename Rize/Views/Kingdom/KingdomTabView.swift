@@ -338,6 +338,50 @@ struct TasksView: View {
     var body: some View {
         VStack {
             // Tasks view content
+            Section(header: Text("Workblock")) {
+                ForEach(CalendarManager.shared.upcomingEvents.filter { $0.isDueSoon }) { event in
+                    TaskRow(event: event)
+                }
+            }
+            
+            Section(header: Text("Recommended Tasks")) {
+                ForEach(xpManager.dailyPlan.recommendedTasks) { task in
+                    TaskRow(task: task)
+                }
+            }
+            
+            Section(header: Text("Deferred Tasks")) {
+                ForEach(xpManager.dailyPlan.deferredTasks) { task in
+                    TaskRow(task: task)
+                }
+            }
         }
+    }
+}
+
+struct TaskRow: View {
+    let event: RizeCalendarEvent?
+    let task: PlannedTask?
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                if let event = event {
+                    Text(event.title)
+                        .font(.system(size: 14, weight: .bold))
+                    Text("Due in \(event.daysUntil) days")
+                        .font(.system(size: 12))
+                } else if let task = task {
+                    Text(task.title)
+                        .font(.system(size: 14, weight: .bold))
+                    Text(task.reason.rawValue.capitalized)
+                        .font(.system(size: 12))
+                }
+            }
+            Spacer()
+        }
+        .padding(8)
+        .background(Color.white.opacity(0.06))
+        .cornerRadius(8)
     }
 }

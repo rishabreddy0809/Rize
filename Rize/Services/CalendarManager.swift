@@ -10,6 +10,7 @@ struct RizeCalendarEvent: Identifiable {
     let isUrgent: Bool
     let mustPlanToday: Bool
     let category: PlanCategory
+    let isDueSoon: Bool  // New property to indicate if the event is due soon
 }
 
 @MainActor
@@ -61,13 +62,15 @@ final class CalendarManager: ObservableObject {
             .compactMap { event -> RizeCalendarEvent? in
                 let days = calendar.dateComponents([.day], from: now, to: event.startDate).day ?? 0
                 let isAcademic = isAcademicEvent(event)
+                let isDueSoon = days <= 3 && days > 1  // Define "DUE SOON" as within the next 3 days but not today or tomorrow
                 return RizeCalendarEvent(
                     title: event.title ?? "Event",
                     date: event.startDate,
                     daysUntil: days,
                     isUrgent: days <= 1,
                     mustPlanToday: isAcademic && days <= 1,
-                    category: PlanCategory.classify(title: event.title ?? "", calendarName: event.calendar?.title)
+                    category: PlanCategory.classify(title: event.title ?? "", calendarName: event.calendar?.title),
+                    isDueSoon: isDueSoon
                 )
             }
     }
@@ -94,7 +97,8 @@ final class CalendarManager: ObservableObject {
                     daysUntil: 0,
                     isUrgent: true,
                     mustPlanToday: isAcademicEvent(event),
-                    category: PlanCategory.classify(title: event.title ?? "", calendarName: event.calendar?.title)
+                    category: PlanCategory.classify(title: event.title ?? "", calendarName: event.calendar?.title),
+                    isDueSoon: false
                 )
             }
     }

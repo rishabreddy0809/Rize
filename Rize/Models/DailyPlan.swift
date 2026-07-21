@@ -61,6 +61,15 @@ enum TaskReason: String, Sendable {
     case deferredCapacity
 }
 
+// MARK: - Workblock
+
+struct WorkblockTask: Identifiable, Equatable, Sendable {
+    let id: UUID
+    let title: String
+    let category: TaskCategory
+    let deadline: DeadlineClass
+}
+
 // MARK: - Workout & Recovery Recommendations
 
 /// What kind of training the engine suggests today. Never a command — the UI
@@ -122,6 +131,7 @@ enum PlanRationale: Equatable, Sendable {
 struct DailyPlan: Equatable, Sendable {
     let recommendedTasks: [PlannedTask]
     let deferredTasks: [PlannedTask]
+    let workblockTasks: [WorkblockTask]  // New property for workblock tasks
     let workout: WorkoutRecommendation
     let recovery: RecoveryRecommendation
     let workload: Workload
