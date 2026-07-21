@@ -19,7 +19,6 @@ final class XPManager: ObservableObject {
     static let shared = XPManager()
 
     // MARK: - AppStorage (kingdom_ prefix)
-    @AppStorage("kingdom_gold") var gold: Int = 50
     @AppStorage("kingdom_realmDefense") var realmDefense: Int = 100
     @AppStorage("kingdom_isUnderSiege") var isUnderSiege: Bool = false
     @AppStorage("kingdom_lastCheckedDate") var lastCheckedDate: String = ""
@@ -83,7 +82,6 @@ final class XPManager: ObservableObject {
 
     /// Restores all kingdom state to a fresh install (used by the debug reset).
     func resetAll() {
-        gold = 50
         realmDefense = 100
         isUnderSiege = false
         lastCheckedDate = ""
@@ -111,7 +109,6 @@ final class XPManager: ObservableObject {
         if completedCount == 0 {
             isUnderSiege = true
             realmDefense = max(0, realmDefense - 25)
-            gold = max(0, gold - 10)
             appendDefenseHistory(defended: false)
         } else {
             let energyBonus = energyScore <= 3 ? 15 : 0
@@ -145,11 +142,8 @@ final class XPManager: ObservableObject {
             isUnderSiege = false
             realmDefense = 100
             bonusXP = energyScore <= 3 ? 30 : 15
-            gold += 20
             siegeBroken = true
             triggerSiegeBrokenUI(bonusXP: bonusXP, energyScore: energyScore)
-        } else {
-            gold += 5
         }
 
         withAnimation(Constants.springAnimation) {
