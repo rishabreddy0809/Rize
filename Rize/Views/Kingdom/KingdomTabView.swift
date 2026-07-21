@@ -42,7 +42,7 @@ struct KingdomTabView: View {
                     .environmentObject(XPManager.shared)
                     .environmentObject(AchievementManager.shared)
             case .strava:
-                StravaView()  // Add this line
+                StravaTabView()  // Add this line
             }
         }
     }
@@ -386,10 +386,52 @@ struct TaskRow: View {
     }
 }
 
-struct StravaView: View {
+struct StravaTabView: View {
+    @ObservedObject private var strava = StravaManager.shared
+    @State private var errorMessage: String?
+    
     var body: some View {
-        Text("Strava")
-            .font(.largeTitle)
-            .foregroundColor(.primary)
+        VStack {
+            if strava.isConnected {
+                if strava.recentWorkouts.isEmpty {
+                    Text("No recent workouts.")
+                        .font(.subheadline)
+                } else {
+                    List(strava.recentWorkouts) { workout in
+                        HStack {
+                            Text(workout.type ?? "Unknown")
+                                .font(.headline)
+                            Spacer()
+                            Text("\(workout.distanceKilometers, specifier: "%.1f") km")
+                                .font(.subheadline)
+                        }
+                    }
+                }
+            } else {
+                Button(action: {
+                    Task {
+                        do {
+                            try await strava.authorize()
+                        } catch {
+                            errorMessage = error.localizedDescription
+                        }
+                    }
+                }) {
+                    Text("Connect to Strava")
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+            }
+            
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding()
+            }
+        }
+        .padding()
     }
 }
