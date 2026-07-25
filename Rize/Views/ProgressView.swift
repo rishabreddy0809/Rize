@@ -6,7 +6,6 @@ struct RizeProgressScreen: View {
     @Query private var profiles: [UserProfile]
     @Query private var entries: [DailyEntry]
     @EnvironmentObject private var xpManager: XPManager
-    @EnvironmentObject private var subscriptionManager: SubscriptionManager
 
     @State private var weeklyInsight: String = ""
     @State private var loadingInsight = false
@@ -33,7 +32,7 @@ struct RizeProgressScreen: View {
                     header
                     statsRow
                     energyChartCard
-                    if subscriptionManager.isPro { weeklyInsightCard }
+                    weeklyInsightCard
                     personalBestsCard
                 }
                 .padding(.horizontal, 16)
@@ -51,7 +50,7 @@ struct RizeProgressScreen: View {
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
             Text("GROW")
-                .font(.system(size: 32, weight: .black, design: .monospaced))
+                .font(.phoenixHero(32))
                 .foregroundColor(PhoenixPalette.textPrimary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -63,9 +62,9 @@ struct RizeProgressScreen: View {
     private var statsRow: some View {
         HStack(spacing: 10) {
             miniStat("TASKS", value: "\(entries.reduce(0) { $0 + $1.tasksCompleted })")
-            miniStat("LEVEL", value: "LV \(KingdomDesign.playerLevel(for: xpManager.totalXP))")
+            miniStat("LEVEL", value: "LV \(PhoenixDesign.playerLevel(for: xpManager.totalXP))")
             miniStat("STREAK", value: "\(profile?.currentStreak ?? 0)d")
-            miniStat("GOLD", value: "\(xpManager.gold)")
+            miniStat("BEST DAY", value: "\(profile?.bestXPDay ?? 0) XP")
         }
     }
 
@@ -76,14 +75,14 @@ struct RizeProgressScreen: View {
                 .font(.system(size: 8, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
             Text(value)
-                .font(.system(.headline, design: .monospaced))
+                .font(.phoenixHeadline())
                 .fontWeight(.bold)
                 .foregroundColor(PhoenixPalette.textPrimary)
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .kingdomGlass(cornerRadius: 12)
+        .phoenixGlass(cornerRadius: 12)
     }
 
     // MARK: - Energy Chart
@@ -154,7 +153,7 @@ struct RizeProgressScreen: View {
             }
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 16)
+        .phoenixGlass(cornerRadius: 16)
     }
 
     // MARK: - Weekly Insight
@@ -195,7 +194,7 @@ struct RizeProgressScreen: View {
             }
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 16)
+        .phoenixGlass(cornerRadius: 16)
         .onAppear { if weeklyInsight.isEmpty { fetchInsight() } }
     }
 
@@ -214,7 +213,7 @@ struct RizeProgressScreen: View {
             }
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 16)
+        .phoenixGlass(cornerRadius: 16)
     }
 
     @ViewBuilder

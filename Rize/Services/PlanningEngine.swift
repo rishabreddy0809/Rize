@@ -41,6 +41,17 @@ struct PlanningEngine {
 
     /// Produce a full daily plan from the given input. Total function — never
     /// throws, never returns nil, safe for any input (including empty).
+    ///
+    /// Shape of this function: a straight-line pipeline, not a class hierarchy
+    /// or strategy pattern — each numbered step below computes one piece of
+    /// the plan from `input` plus whatever earlier steps already derived
+    /// (e.g. `burnout` factors into task selection, which is deliberately
+    /// computed *after* burnout risk so overload can be suppressed), then
+    /// step 8 assembles everything into the immutable `DailyPlan` result.
+    /// Every step is a private, pure function below (`determineWorkload`,
+    /// `selectTasks`, etc.) — that's what keeps this readable despite doing
+    /// a lot: each one is independently followable, and the pipeline itself
+    /// is just wiring them together in the right order.
     func makePlan(from input: PlanInput) -> DailyPlan {
         let band = input.energyBand
         let sleepQuality = input.sleep?.quality
@@ -105,9 +116,22 @@ struct PlanningEngine {
             burnout: burnout
         )
 
+        // 8. "Due soon" tasks (today or tomorrow) surfaced in the workblock.
+        let workblockTasks = classified
+            .filter { $0.deadline == .today || $0.deadline == .tomorrow }
+            .map { entry in
+                WorkblockTask(
+                    id: entry.task.id,
+                    title: entry.task.title,
+                    category: entry.task.category,
+                    deadline: entry.deadline
+                )
+            }
+
         return DailyPlan(
             recommendedTasks: selection.recommended,
             deferredTasks: selection.deferred,
+            workblockTasks: workblockTasks,
             workout: workout,
             recovery: recovery,
             workload: workload,
@@ -160,6 +184,18 @@ struct PlanningEngine {
         var deferred: [PlannedTask]
     }
 
+    /// The core selection strategy, in plain terms: split tasks into
+    /// "mandatory" (overdue or due today — always included, no matter how
+    /// depleted the user is) and "optional" (everything else, competing for
+    /// a limited budget of remaining slots). The budget itself shrinks with
+    /// bad sleep or high burnout risk, then optional tasks are greedily
+    /// added in rank order (nearest deadline first, then priority) until the
+    /// budget, the "how many future tasks am I allowed to front-load" limit,
+    /// and the energy-band gate (e.g. depleted days admit *no* optional
+    /// tasks at all) all say stop. Everything that doesn't make the cut goes
+    /// to `deferred` instead of just being dropped, each carrying its own
+    /// `TaskReason` for why — so the UI can say *why* a task was pushed, not
+    /// just that it was.
     private func selectTasks(
         classified: [(task: PlanningTask, deadline: DeadlineClass)],
         band: EnergyBand,

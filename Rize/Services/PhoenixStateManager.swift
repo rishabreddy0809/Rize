@@ -1,10 +1,10 @@
 import SwiftUI
 
-// Thin observable wrapper that aggregates kingdom display state
+// Thin observable wrapper that aggregates phoenix display state
 // so views don't import XPManager directly for read-only UI bindings.
 @MainActor
-final class KingdomStateManager: ObservableObject {
-    static let shared = KingdomStateManager()
+final class PhoenixStateManager: ObservableObject {
+    static let shared = PhoenixStateManager()
 
     @Published var showAchievementBanner: Bool = false
     @Published var achievementTitle: String = ""

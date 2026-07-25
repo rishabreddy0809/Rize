@@ -1,16 +1,8 @@
 import XCTest
 @testable import Rize
 
-/// Unit tests for the deterministic `PlanningEngine`.
-///
-/// NOTE: These require a Unit Testing bundle target. This project's Xcode
-/// project is hand-maintained and currently has no test target, so this file is
-/// intentionally **not** compiled into the app target. To run:
-/// Xcode ▸ File ▸ New ▸ Target ▸ Unit Testing Bundle, then add this file to it.
-///
-/// The same scenarios are also verified headless via `swiftc` during
-/// development (see the engine verification harness), so the engine's behaviour
-/// is exercised even before the test target exists.
+/// Unit tests for the deterministic `PlanningEngine`. Runs under the RizeTests
+/// unit testing bundle target — `xcodebuild test -scheme Rize` or Cmd+U in Xcode.
 final class PlanningEngineTests: XCTestCase {
 
     private let engine = PlanningEngine()
@@ -87,7 +79,7 @@ final class PlanningEngineTests: XCTestCase {
     // MARK: - Workouts
 
     func testHardWorkoutYesterdayTriggersRecovery() {
-        let hardRun = WorkoutSummary(type: "Run", startDate: day(-1), distanceMeters: 15000, movingTime: 5400, source: .strava)
+        let hardRun = WorkoutSummary(type: "Run", startDate: day(-1), distanceMeters: 15000, movingTime: 5400, source: .healthKit)
         let plan = engine.makePlan(from: input(
             energy: 5,
             tasks: [task("A", .high, due: 0), task("B", .medium, due: 1)],

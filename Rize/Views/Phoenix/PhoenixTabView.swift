@@ -1,66 +1,29 @@
 import SwiftUI
 import SwiftData
 
-enum KingdomTab: MorphingTabProtocol, CaseIterable {
-    case phoenix
-    case tasks
-    case strava
-    
-    var symbolImage: String {
-        switch self {
-        case .phoenix: return "flame.fill"
-        case .tasks: return "list.bullet"
-        case .strava: return "figure.walk.circle.fill"
-        }
-    }
-    
-    var title: String {
-        switch self {
-        case .phoenix: return "Phoenix"
-        case .tasks: return "Tasks"
-        case .strava: return "Strava"
-        }
-    }
-}
-
-struct KingdomTabView: View {
-    @State private var activeTab = KingdomTab.phoenix
-    @State private var isExpanded = false
-    
-    var body: some View {
-        MorphingTabBar(
-            activeTab: $activeTab,
-            isExpanded: $isExpanded
-        ) {
-            switch activeTab {
-            case .phoenix:
-                PhoenixView()
-                    .environmentObject(XPManager.shared)
-                    .environmentObject(AchievementManager.shared)
-            case .tasks:
-                TasksView()
-                    .environmentObject(XPManager.shared)
-                    .environmentObject(AchievementManager.shared)
-            case .strava:
-                StravaTabView()  // Add this line
-            }
-        }
-    }
-}
-
 /// The Phoenix tab: a home for the user's companion. Shows the current
 /// evolution tier, the Phoenix's vitality (health), XP progress to the next
 /// tier, and the full evolution ladder. Read-only and celebratory — never a
 /// place for guilt.
 struct PhoenixView: View {
     @Query private var profiles: [UserProfile]
+    @Query private var entries: [DailyEntry]
     @EnvironmentObject private var xpManager: XPManager
     @EnvironmentObject private var achievementManager: AchievementManager
+    @State private var lowEnergyPage = 0
 
     private var profile: UserProfile? { profiles.first }
 
-    private var tierInfo: KingdomDesign.TierInfo {
-        KingdomDesign.tierInfo(for: xpManager.totalXP)
+    /// Days the user pushed through on energy 3 or below — sorted most-recent
+    /// first so the page picker starts on the freshest example.
+    private var lowEnergyDays: [DailyEntry] {
+        entries
+            .filter { ($0.energyScore ?? .max) <= 3 && $0.tasksCompleted > 0 }
+            .sorted { $0.date > $1.date }
+    }
+
+    private var tierInfo: PhoenixDesign.TierInfo {
+        PhoenixDesign.tierInfo(for: xpManager.totalXP)
     }
 
     /// Progress through the current tier, 0…1.
@@ -73,7 +36,7 @@ struct PhoenixView: View {
 
     private var nextTierName: String? {
         let next = tierInfo.index + 1
-        return next < KingdomDesign.tiers.count ? KingdomDesign.tiers[next].name : nil
+        return next < PhoenixDesign.tiers.count ? PhoenixDesign.tiers[next].name : nil
     }
 
     var body: some View {
@@ -96,6 +59,10 @@ struct PhoenixView: View {
                     vitalityCard
                     progressCard
                     tierLadder
+                    badgesCard
+                    if !lowEnergyDays.isEmpty {
+                        daysThatBuiltYouCard
+                    }
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
@@ -113,11 +80,11 @@ struct PhoenixView: View {
                     .font(.system(size: 11, weight: .bold, design: .monospaced))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
                 Text(tierInfo.name)
-                    .font(.system(size: 24, weight: .bold, design: .monospaced))
+                    .font(.phoenixTitle(24))
                     .foregroundColor(tierInfo.color)
             }
             Spacer()
-            Text("LV \(KingdomDesign.playerLevel(for: xpManager.totalXP))")
+            Text("LV \(PhoenixDesign.playerLevel(for: xpManager.totalXP))")
                 .font(.system(size: 12, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textPrimary)
                 .padding(.horizontal, 10)
@@ -165,7 +132,7 @@ struct PhoenixView: View {
                 ZStack(alignment: .leading) {
                     RoundedRectangle(cornerRadius: 4).fill(Color.white.opacity(0.06))
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(KingdomDesign.defenseBarColor(xpManager.realmDefense))
+                        .fill(PhoenixDesign.defenseBarColor(xpManager.realmDefense))
                         .frame(width: geo.size.width * Double(xpManager.realmDefense) / 100.0)
                         .animation(Constants.springAnimation, value: xpManager.realmDefense)
                 }
@@ -175,7 +142,7 @@ struct PhoenixView: View {
             HStack {
                 Text("\(xpManager.realmDefense)% health")
                     .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundColor(KingdomDesign.defenseBarColor(xpManager.realmDefense))
+                    .foregroundColor(PhoenixDesign.defenseBarColor(xpManager.realmDefense))
                 Spacer()
                 if xpManager.isUnderSiege {
                     Text("Complete one task to reignite 🔥")
@@ -191,11 +158,11 @@ struct PhoenixView: View {
                 divider
                 statItem(icon: "crown.fill", value: "\(profile?.bestStreak ?? 0)", label: "BEST", color: PhoenixPalette.radiant)
                 divider
-                statItem(icon: "shield.fill", value: "\(xpManager.realmDefense)%", label: "DEFENSE", color: KingdomDesign.defenseBarColor(xpManager.realmDefense))
+                statItem(icon: "shield.fill", value: "\(xpManager.realmDefense)%", label: "DEFENSE", color: PhoenixDesign.defenseBarColor(xpManager.realmDefense))
             }
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 18)
+        .phoenixGlass(cornerRadius: 18)
     }
 
     private var divider: some View {
@@ -261,7 +228,7 @@ struct PhoenixView: View {
             }
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 18)
+        .phoenixGlass(cornerRadius: 18)
     }
 
     // MARK: - Tier Ladder
@@ -272,15 +239,15 @@ struct PhoenixView: View {
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
 
-            ForEach(Array(KingdomDesign.tiers.enumerated()), id: \.offset) { index, tier in
+            ForEach(Array(PhoenixDesign.tiers.enumerated()), id: \.offset) { index, tier in
                 tierRow(index: index, tier: tier)
-                if index < KingdomDesign.tiers.count - 1 {
+                if index < PhoenixDesign.tiers.count - 1 {
                     Divider().background(Color.white.opacity(0.06))
                 }
             }
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 18)
+        .phoenixGlass(cornerRadius: 18)
     }
 
     @ViewBuilder
@@ -292,11 +259,25 @@ struct PhoenixView: View {
             ZStack {
                 Circle()
                     .fill(tier.color.opacity(unlocked ? 0.22 : 0.06))
-                    .frame(width: 34, height: 34)
-                Image(systemName: unlocked ? "flame.fill" : "lock.fill")
-                    .font(.system(size: 13))
-                    .foregroundColor(unlocked ? tier.color : PhoenixPalette.textSecondary.opacity(0.4))
+                    .frame(width: 44, height: 44)
+
+                // A dimmed preview of the tier's actual visual, not just a lock
+                // icon — so locked rows show what you're working toward.
+                PhoenixTierVisual(tierIndex: index, size: 34, decorated: false)
+                    .saturation(unlocked ? 1 : 0)
+                    .opacity(unlocked ? 1 : 0.45)
+                    .allowsHitTesting(false)
+
+                if !unlocked {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(.white.opacity(0.75))
+                        .padding(4)
+                        .background(Circle().fill(Color.black.opacity(0.55)))
+                        .offset(x: 15, y: 15)
+                }
             }
+            .frame(width: 44, height: 44)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(tier.name)
@@ -324,6 +305,211 @@ struct PhoenixView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(tier.name), \(isCurrent ? "current tier" : unlocked ? "unlocked" : "locked, needs \(tier.minXP) XP").")
+    }
+
+    // MARK: - Badges
+
+    private var badgesCard: some View {
+        let unlockedIDs = Set(profile?.unlockedAchievements ?? [])
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("BADGES")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                Spacer()
+                Text("\(unlockedIDs.count)/\(AchievementManager.all.count)")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .foregroundColor(PhoenixPalette.textPrimary)
+            }
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 14) {
+                ForEach(AchievementManager.all) { badge in
+                    badgeCell(badge, unlocked: unlockedIDs.contains(badge.id))
+                }
+            }
+        }
+        .padding(16)
+        .phoenixGlass(cornerRadius: 18)
+    }
+
+    @ViewBuilder
+    private func badgeCell(_ badge: AchievementDefinition, unlocked: Bool) -> some View {
+        let lockedGray = Color(white: 0.32)
+
+        VStack(spacing: 8) {
+            ZStack {
+                // Bevel — a darker, slightly-offset twin of the medallion sitting
+                // "underneath" it, the classic Duolingo chunky-icon look.
+                Circle()
+                    .fill(unlocked ? badge.color.darker(0.4) : lockedGray.darker(0.3))
+                    .frame(width: 64, height: 64)
+                    .offset(y: 4)
+
+                // Medallion face
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: unlocked
+                                ? [badge.color.lighter(0.22), badge.color]
+                                : [lockedGray.opacity(0.9), lockedGray.opacity(0.7)],
+                            startPoint: .top, endPoint: .bottom
+                        )
+                    )
+                    .frame(width: 64, height: 64)
+                    .overlay(
+                        Circle().stroke(unlocked ? Color.white.opacity(0.55) : Color.white.opacity(0.12), lineWidth: 2)
+                    )
+                    .shadow(color: unlocked ? badge.color.opacity(0.45) : .clear, radius: 8, y: 3)
+
+                // The mascot, engraved into the medallion — a distinct still
+                // frame per badge (flight, ember, ash, tier form) rather than
+                // one pose repeated, desaturated to a ghost when locked.
+                Image(badge.mascotImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 46, height: 46)
+                    .saturation(unlocked ? 1 : 0)
+                    .opacity(unlocked ? 1 : 0.3)
+                    .offset(y: 2)
+                    .shadow(color: .black.opacity(unlocked ? 0.2 : 0), radius: 2, y: 1)
+                    .clipShape(Circle().inset(by: 3))
+
+                // Gloss highlight arcing across the top — gives the medallion a
+                // glassy pop instead of a flat painted circle.
+                Circle()
+                    .trim(from: 0.56, to: 0.94)
+                    .stroke(Color.white.opacity(unlocked ? 0.5 : 0.15), style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                    .frame(width: 54, height: 54)
+                    .rotationEffect(.degrees(180))
+                    .allowsHitTesting(false)
+
+                // Achievement-specific glyph, as a small chip so the badge is
+                // still identifiable at a glance without reading the title.
+                Circle()
+                    .fill(unlocked ? badge.color.darker(0.15) : lockedGray.darker(0.2))
+                    .overlay(Circle().stroke(Color.white.opacity(0.4), lineWidth: 1))
+                    .frame(width: 22, height: 22)
+                    .overlay(
+                        Image(systemName: unlocked ? badge.icon : "lock.fill")
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(unlocked ? .white : .white.opacity(0.6))
+                    )
+                    .offset(x: 21, y: 21)
+
+                if unlocked {
+                    Image(systemName: "sparkle")
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundColor(PhoenixPalette.eternal)
+                        .offset(x: -22, y: -22)
+                }
+            }
+            .frame(width: 64, height: 68)
+
+            Text(badge.title)
+                .font(.system(size: 9, weight: .heavy, design: .rounded))
+                .foregroundColor(unlocked ? PhoenixPalette.textPrimary : PhoenixPalette.textSecondary.opacity(0.4))
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.85)
+                .frame(height: 24)
+        }
+        .frame(maxWidth: .infinity)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(badge.title), \(unlocked ? "unlocked" : "locked"). \(badge.description)")
+    }
+
+    // MARK: - Days That Built You
+
+    private var lowEnergyPageCount: Int {
+        max(1, Int(ceil(Double(lowEnergyDays.count) / 2.0)))
+    }
+
+    private var daysThatBuiltYouCard: some View {
+        let start = lowEnergyPage * 2
+        let pageEntries = Array(lowEnergyDays[start..<min(start + 2, lowEnergyDays.count)])
+
+        return VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("DAYS THAT BUILT YOU")
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                    Text("Low-energy days you still showed up.")
+                        .font(.system(size: 10, design: .rounded))
+                        .foregroundColor(PhoenixPalette.textSecondary.opacity(0.5))
+                }
+                Spacer()
+                if lowEnergyPageCount > 1 {
+                    HStack(spacing: 8) {
+                        Button {
+                            withAnimation(Constants.springAnimation) { lowEnergyPage = max(0, lowEnergyPage - 1) }
+                        } label: {
+                            Image(systemName: "chevron.left")
+                        }
+                        .disabled(lowEnergyPage == 0)
+
+                        Text("\(lowEnergyPage + 1)/\(lowEnergyPageCount)")
+                            .font(.system(size: 10, weight: .bold, design: .monospaced))
+
+                        Button {
+                            withAnimation(Constants.springAnimation) { lowEnergyPage = min(lowEnergyPageCount - 1, lowEnergyPage + 1) }
+                        } label: {
+                            Image(systemName: "chevron.right")
+                        }
+                        .disabled(lowEnergyPage >= lowEnergyPageCount - 1)
+                    }
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(PhoenixPalette.textPrimary.opacity(0.8))
+                }
+            }
+
+            VStack(spacing: 10) {
+                ForEach(pageEntries, id: \.id) { entry in
+                    lowEnergyDayRow(entry)
+                }
+            }
+        }
+        .padding(16)
+        .phoenixGlass(cornerRadius: 18)
+        .onChange(of: lowEnergyDays.count) { _, _ in
+            lowEnergyPage = min(lowEnergyPage, lowEnergyPageCount - 1)
+        }
+    }
+
+    private func lowEnergyDayRow(_ entry: DailyEntry) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(PhoenixPalette.destructive.opacity(0.15))
+                    .frame(width: 40, height: 40)
+                Image(systemName: "flame.fill")
+                    .font(.system(size: 15))
+                    .foregroundColor(PhoenixPalette.destructive.opacity(0.85))
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(lowEnergyDayLabel(entry.date))
+                    .font(.system(size: 12, weight: .bold, design: .monospaced))
+                    .foregroundColor(PhoenixPalette.textPrimary)
+                Text("Energy \(entry.energyScore ?? 0)/10 · \(entry.tasksCompleted)/\(entry.totalTasksForDay) tasks")
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
+            }
+
+            Spacer()
+
+            Text("+\(entry.xpEarned) XP")
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundColor(PhoenixPalette.success)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(lowEnergyDayLabel(entry.date)), energy \(entry.energyScore ?? 0) out of 10, completed \(entry.tasksCompleted) of \(entry.totalTasksForDay) tasks, earned \(entry.xpEarned) XP.")
+    }
+
+    private func lowEnergyDayLabel(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE, MMM d"
+        return formatter.string(from: date)
     }
 }
 
@@ -383,55 +569,5 @@ struct TaskRow: View {
         .padding(8)
         .background(Color.white.opacity(0.06))
         .cornerRadius(8)
-    }
-}
-
-struct StravaTabView: View {
-    @ObservedObject private var strava = StravaManager.shared
-    @State private var errorMessage: String?
-    
-    var body: some View {
-        VStack {
-            if strava.isConnected {
-                if strava.recentWorkouts.isEmpty {
-                    Text("No recent workouts.")
-                        .font(.subheadline)
-                } else {
-                    List(strava.recentWorkouts) { workout in
-                        HStack {
-                            Text(workout.type ?? "Unknown")
-                                .font(.headline)
-                            Spacer()
-                            Text("\(workout.distanceKilometers, specifier: "%.1f") km")
-                                .font(.subheadline)
-                        }
-                    }
-                }
-            } else {
-                Button(action: {
-                    Task {
-                        do {
-                            try await strava.authorize()
-                        } catch {
-                            errorMessage = error.localizedDescription
-                        }
-                    }
-                }) {
-                    Text("Connect to Strava")
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                }
-            }
-            
-            if let errorMessage = errorMessage {
-                Text(errorMessage)
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding()
-            }
-        }
-        .padding()
     }
 }

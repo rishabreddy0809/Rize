@@ -16,8 +16,6 @@ struct Constants {
     static let streakBonus = 50             // added when streak >= 7
     static let allTasksBonus = 100          // completing all tasks
 
-    static let freePlanLimitPerMonth = 5
-
     static let springAnimation = Animation.spring(response: 0.45, dampingFraction: 0.78)
 
     static func energyColor(for energy: Int) -> Color {

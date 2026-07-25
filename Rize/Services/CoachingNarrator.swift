@@ -2,6 +2,27 @@ import Foundation
 import FoundationModels
 
 // MARK: - Narrative Model
+//
+// FoundationModels (iOS 26+) is Apple's framework for talking to the small
+// on-device LLM ("Apple Intelligence") built into the OS — no network call,
+// no API key, and (per this app's own constraint, see the guardrail comment
+// on `narrate` below) no cloud fallback. Two macros from that framework do
+// the heavy lifting on `CoachingNarrative`:
+//
+//   - `@Generable` marks a type as something the model can produce directly,
+//     as *structured* output — the model is constrained at generation time
+//     to only ever emit values that satisfy this exact shape (four specific
+//     string fields, in this case), never free-form text you'd have to hope
+//     is valid JSON and then parse yourself. This is the actual mechanism
+//     behind `session.respond(to:generating:)` down in `narrate` — passing
+//     `CoachingNarrative.self` as `generating:` is what tells the model
+//     "your output must conform to this."
+//   - `@Guide(description:)` on each property is a per-field instruction —
+//     not documentation for humans, but a prompt fragment the model reads
+//     to decide what to put in that specific field (tone, length, content).
+//     It's how one `@Generable` type can express "one sentence here, a
+//     phoenix-themed one-liner there" instead of every field getting the
+//     same generic treatment.
 
 /// The user-facing coaching copy for a day. Produced from an already-decided
 /// `DailyPlan` — the narrator phrases decisions, it never makes them.
@@ -52,6 +73,19 @@ struct CoachingNarrator {
 
     static let shared = CoachingNarrator()
 
+    // `SystemLanguageModel.default` is the single on-device model FoundationModels
+    // exposes — there's no model selection the way there is with a cloud API,
+    // just this one shared instance. `.availability` is why this framework
+    // needs a fallback path everywhere it's used: unlike a network API call
+    // (which basically always *attempts* to run and fails with an error if
+    // something's wrong), this model can be entirely absent from the device's
+    // capabilities before you ever try to use it — Apple Intelligence turned
+    // off in Settings, an ineligible/older device, or the model still
+    // downloading in the background. `.available` is the one case where
+    // generation can be attempted at all; every other case (and the fallback
+    // pattern below is used both here in `narrate` and in `weeklyInsight`)
+    // must be handled by the deterministic `template`/`weeklyTemplate` methods
+    // near the bottom of this file instead.
     private let model = SystemLanguageModel.default
 
     init() {}
@@ -71,10 +105,23 @@ struct CoachingNarrator {
             return CoachingNarrator.template(for: plan, context: context)
         }
 
+        // `LanguageModelSession` is FoundationModels' unit of conversation —
+        // roughly analogous to a chat thread: `instructions` is a persistent
+        // system prompt applied to everything sent through this session (see
+        // `dailyInstructions` below, which sets the "Ryz" persona and its
+        // hard rules once rather than repeating them per call).
         let session = LanguageModelSession(instructions: CoachingNarrator.dailyInstructions)
         let prompt = CoachingNarrator.groundingPrompt(for: plan, context: context)
 
         do {
+            // `generating: CoachingNarrative.self` is what makes this guided
+            // generation rather than plain text — the model is constrained to
+            // only produce values matching that `@Generable` shape (see the
+            // comment on `CoachingNarrative` above), which `response.content`
+            // then hands back already as a real `CoachingNarrative`, not a
+            // string to parse. Compare to `weeklyInsight` below, which omits
+            // `generating:` and gets plain `String` back instead — guided
+            // generation is opt-in per call, not a session-wide mode.
             let response = try await session.respond(
                 to: prompt,
                 generating: CoachingNarrative.self,

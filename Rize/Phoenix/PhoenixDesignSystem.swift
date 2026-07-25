@@ -1,8 +1,8 @@
 import SwiftUI
 
-// MARK: - Kingdom Task Section
+// MARK: - Phoenix Task Section
 
-enum KingdomTaskSection: String, CaseIterable {
+enum PhoenixTaskSection: String, CaseIterable {
     case morning
     case anytime
     case evening
@@ -26,7 +26,7 @@ enum KingdomTaskSection: String, CaseIterable {
         }
     }
 
-    static func from(taskType: String) -> KingdomTaskSection {
+    static func from(taskType: String) -> PhoenixTaskSection {
         switch taskType.lowercased() {
         case "physical": return .morning
         case "work": return .anytime
@@ -34,6 +34,105 @@ enum KingdomTaskSection: String, CaseIterable {
         default: return .queue
         }
     }
+}
+
+// MARK: - Plan Category
+
+/// The category a task belongs to in the Today plan. Real calendar events are
+/// classified into these from their title/calendar name (see `classify`);
+/// the adaptive wellness tasks map in from their `TaskCategory`. This drives
+/// the grouped section headers in the plan ("WORKOUTS", "CLASSES", …).
+enum PlanCategory: String, CaseIterable, Sendable {
+    case workout
+    case classes
+    case work
+    case recovery
+    case personal
+
+    var title: String {
+        switch self {
+        case .workout:  return "Workouts"
+        case .classes:  return "Classes"
+        case .work:     return "Work Blocks"
+        case .recovery: return "Recovery"
+        case .personal: return "Personal"
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .workout:  return "figure.run"
+        case .classes:  return "graduationcap.fill"
+        case .work:     return "briefcase.fill"
+        case .recovery: return "moon.fill"
+        case .personal: return "calendar"
+        }
+    }
+
+    var color: Color {
+        switch self {
+        case .workout:  return Color(hex: "FF6B35")    // energetic orange
+        case .classes:  return Color(hex: "0A84FF")    // study blue
+        case .work:     return PhoenixPalette.primary  // amber gold
+        case .recovery: return Color(hex: "9B7EDE")    // calm purple
+        case .personal: return PhoenixPalette.success  // sage green
+        }
+    }
+
+    /// Stable order for the section headers, top to bottom.
+    var sortOrder: Int {
+        switch self {
+        case .workout:  return 0
+        case .classes:  return 1
+        case .work:     return 2
+        case .personal: return 3
+        case .recovery: return 4
+        }
+    }
+
+    /// Map a persisted `RizeTask.type` string into a display category. Handles
+    /// both the new category rawValues ("workout", "classes", …) and the legacy
+    /// wellness strings ("physical", "work", "recovery").
+    static func from(taskType: String) -> PlanCategory {
+        switch taskType.lowercased() {
+        case "workout", "physical": return .workout
+        case "class", "classes":    return .classes
+        case "work":                return .work
+        case "recovery":            return .recovery
+        case "personal":            return .personal
+        default:                    return .personal
+        }
+    }
+
+    /// Classify a calendar event by its title and originating calendar name.
+    /// Checked most-specific first: workout → classes → work → personal.
+    static func classify(title: String, calendarName: String?) -> PlanCategory {
+        let hay = "\(title) \(calendarName ?? "")".lowercased()
+        if containsAny(hay, workoutKeywords) { return .workout }
+        if containsAny(hay, classKeywords)   { return .classes }
+        if containsAny(hay, workKeywords)    { return .work }
+        return .personal
+    }
+
+    private static func containsAny(_ haystack: String, _ needles: [String]) -> Bool {
+        needles.contains { haystack.contains($0) }
+    }
+
+    private static let workoutKeywords = [
+        "gym", "workout", "training", "run", "ride", "cycl", "bike", "swim",
+        "lift", "yoga", "pilates", "crossfit", "spin", "hiit", "cardio",
+        "practice", "soccer", "basketball", "tennis", "climb", "fitness"
+    ]
+    private static let classKeywords = [
+        "class", "lecture", "seminar", "course", "tutorial", "lesson", "study",
+        "exam", "quiz", "midterm", "final", "recitation", "discussion",
+        "office hours", "school", "homework", "lab "
+    ]
+    private static let workKeywords = [
+        "meeting", "standup", "stand-up", "sync", "1:1", "one-on-one", "review",
+        "call", "interview", "work", "project", "deadline", "presentation",
+        "demo", "sprint", "planning", "retro", "client", "deep work", "focus"
+    ]
 }
 
 // MARK: - Phoenix Palette
@@ -66,6 +165,33 @@ enum PhoenixPalette {
     static let eternal   = Color(hex: "FFD700")
 }
 
+// MARK: - Phoenix Typography
+
+/// "Cinzel" is the engraved-serif display face used for titles/headers across the app,
+/// giving the kingdom/castle theme a consistent regal identity. Body copy stays on the
+/// system rounded font for legibility at small sizes.
+extension Font {
+    /// Large hero titles (onboarding wordmark, big celebration headlines).
+    static func phoenixHero(_ size: CGFloat) -> Font {
+        .custom("Cinzel-Black", size: size, relativeTo: .largeTitle)
+    }
+
+    /// Section/screen titles.
+    static func phoenixTitle(_ size: CGFloat) -> Font {
+        .custom("Cinzel-ExtraBold", size: size, relativeTo: .title)
+    }
+
+    /// Card headlines, list section headers, tier names.
+    static func phoenixHeadline(_ size: CGFloat = 17) -> Font {
+        .custom("Cinzel-Bold", size: size, relativeTo: .headline)
+    }
+
+    /// Small labels/badges that still want the display face.
+    static func phoenixLabel(_ size: CGFloat) -> Font {
+        .custom("Cinzel-Bold", size: size, relativeTo: .caption)
+    }
+}
+
 // MARK: - Fire Gradient Background
 
 /// Full-bleed vertical fire gradient. Applied as the base ZStack layer on every main screen.
@@ -89,7 +215,7 @@ struct PhoenixBackground: View {
 
 // MARK: - Phoenix Design
 
-enum KingdomDesign {
+enum PhoenixDesign {
     struct TierInfo {
         let minXP: Int
         let name: String
@@ -128,7 +254,7 @@ enum KingdomDesign {
         return PhoenixPalette.destructive
     }
 
-    static func sectionColor(_ section: KingdomTaskSection) -> Color {
+    static func sectionColor(_ section: PhoenixTaskSection) -> Color {
         switch section {
         case .morning: return .orange
         case .anytime: return Color(hex: "0A84FF")
@@ -140,12 +266,17 @@ enum KingdomDesign {
 
 // MARK: - Glass Style
 
-struct KingdomGlassStyle: ViewModifier {
+struct PhoenixGlassStyle: ViewModifier {
     var cornerRadius: CGFloat
+    @Environment(\.rizeReduceTransparency) private var reduceTransparency
 
     func body(content: Content) -> some View {
         content
-            .background(PhoenixPalette.surface)
+            // `surface` is a translucent fill designed to sit over the fire
+            // gradient background — with Reduce Transparency on, swap in an
+            // opaque near-black so card contents never have to compete with
+            // whatever's showing through underneath.
+            .background(reduceTransparency ? Color(red: 0.08, green: 0.02, blue: 0.02) : PhoenixPalette.surface)
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .stroke(PhoenixPalette.surfaceBorder, lineWidth: 1)
@@ -155,8 +286,8 @@ struct KingdomGlassStyle: ViewModifier {
 }
 
 extension View {
-    func kingdomGlass(cornerRadius: CGFloat = 16) -> some View {
-        modifier(KingdomGlassStyle(cornerRadius: cornerRadius))
+    func phoenixGlass(cornerRadius: CGFloat = 16) -> some View {
+        modifier(PhoenixGlassStyle(cornerRadius: cornerRadius))
     }
 }
 
@@ -202,6 +333,7 @@ struct PhoenixTierVisual: View {
 private struct AshVisual: View {
     static let naturalSize: CGFloat = 80
     @State private var breathe = false
+    @Environment(\.rizeReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -220,6 +352,7 @@ private struct AshVisual: View {
                 .frame(width: Self.naturalSize, height: Self.naturalSize)
         }
         .onAppear {
+            guard !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 4).repeatForever(autoreverses: true)) {
                 breathe = true
             }
@@ -233,6 +366,7 @@ private struct AwakeningVisual: View {
     static let naturalSize: CGFloat = 140
     @State private var coreFlicker = false
     @State private var wingFlicker = false
+    @Environment(\.rizeReduceMotion) private var reduceMotion
 
     var body: some View {
         ZStack {
@@ -266,6 +400,7 @@ private struct AwakeningVisual: View {
         }
         .frame(width: Self.naturalSize, height: Self.naturalSize)
         .onAppear {
+            guard !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 1.3).repeatForever(autoreverses: true)) { coreFlicker = true }
             withAnimation(.easeInOut(duration: 1.7).repeatForever(autoreverses: true)) { wingFlicker = true }
         }
@@ -381,6 +516,7 @@ private struct PulsingRing: View {
     var diameter: CGFloat
     var duration: Double
     @State private var animate = false
+    @Environment(\.rizeReduceMotion) private var reduceMotion
 
     var body: some View {
         Circle()
@@ -389,6 +525,7 @@ private struct PulsingRing: View {
             .scaleEffect(animate ? 1.3 : 1.0)
             .opacity(animate ? 0 : 1)
             .onAppear {
+                guard !reduceMotion else { return }
                 withAnimation(.easeOut(duration: duration).repeatForever(autoreverses: false)) {
                     animate = true
                 }
@@ -403,6 +540,7 @@ private struct RotatingDashedRing: View {
     var duration: Double
     var clockwise: Bool = true
     @State private var angle: Double = 0
+    @Environment(\.rizeReduceMotion) private var reduceMotion
 
     var body: some View {
         Circle()
@@ -410,6 +548,7 @@ private struct RotatingDashedRing: View {
             .frame(width: diameter, height: diameter)
             .rotationEffect(.degrees(angle))
             .onAppear {
+                guard !reduceMotion else { return }
                 withAnimation(.linear(duration: duration).repeatForever(autoreverses: false)) {
                     angle = clockwise ? 360 : -360
                 }
@@ -426,6 +565,7 @@ private struct RadiantRing: View {
     var clockwise: Bool
     @State private var pulsing = false
     @State private var angle: Double = 0
+    @Environment(\.rizeReduceMotion) private var reduceMotion
 
     var body: some View {
         Circle()
@@ -435,6 +575,7 @@ private struct RadiantRing: View {
             .opacity(pulsing ? 0 : 1)
             .rotationEffect(.degrees(angle))
             .onAppear {
+                guard !reduceMotion else { return }
                 withAnimation(.easeOut(duration: pulseDuration).repeatForever(autoreverses: false)) {
                     pulsing = true
                 }

@@ -1,15 +1,20 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct OnboardingView: View {
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var subscriptionManager: SubscriptionManager
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
 
     @State private var page = 0
     @State private var name = ""
     @State private var goal = "fitness"
     @State private var goalDetail = ""
+    @State private var selectedGoalTags: Set<String> = []
+    @State private var customGoalTags: [String] = []
+    @State private var goalDetailInput = ""
+    @State private var obReduceMotion = false
+    @State private var obReduceTransparency = false
+    @State private var obHighContrast = false
 
     private let spring = Constants.springAnimation
 
@@ -27,10 +32,7 @@ struct OnboardingView: View {
             case 6: healthKitPage
             case 7: calendarPage
             case 8: notificationsPage
-            case 9: OnboardingPaywallView(onContinue: finishOnboarding, onTrial: {
-                Task { await subscriptionManager.purchase(productID: SubscriptionManager.monthlyID) }
-                finishOnboarding()
-            })
+            case 9: accessibilityPage
             default: welcomePage
             }
         }
@@ -57,6 +59,7 @@ struct OnboardingView: View {
         case 6: return "This helps me build smarter plans for you."
         case 7: return "I'll help you stay ahead of what's coming."
         case 8: return "I'll remind you gently. Never spam."
+        case 9: return "Set it up your way. I'll adapt."
         default: return "Ready when you are."
         }
     }
@@ -71,7 +74,7 @@ struct OnboardingView: View {
 
             VStack(spacing: 12) {
                 Text("Rize.")
-                    .font(.system(size: 56, weight: .black, design: .rounded))
+                    .font(.phoenixHero(56))
                     .foregroundColor(PhoenixPalette.textPrimary)
 
                 Text("Show up. Even on your worst days.")
@@ -97,7 +100,7 @@ struct OnboardingView: View {
 
             VStack(spacing: 16) {
                 Text("Your energy. Your plan.")
-                    .font(.system(size: 28, weight: .bold, design: .monospaced))
+                    .font(.phoenixTitle(28))
                     .foregroundColor(PhoenixPalette.textPrimary)
                     .multilineTextAlignment(.center)
 
@@ -128,7 +131,7 @@ struct OnboardingView: View {
             Spacer()
 
             HStack(spacing: 14) {
-                ForEach(Array(KingdomDesign.tiers.enumerated()), id: \.offset) { index, tier in
+                ForEach(Array(PhoenixDesign.tiers.enumerated()), id: \.offset) { index, tier in
                     VStack(spacing: 6) {
                         PhoenixTierVisual(tierIndex: index, size: 44, decorated: false)
                         Text(tier.name)
@@ -140,7 +143,7 @@ struct OnboardingView: View {
 
             VStack(spacing: 12) {
                 Text("Your phoenix grows as you do.")
-                    .font(.system(size: 24, weight: .bold, design: .monospaced))
+                    .font(.phoenixTitle(24))
                     .foregroundColor(PhoenixPalette.textPrimary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
@@ -168,16 +171,16 @@ struct OnboardingView: View {
             Spacer()
 
             Text("What's your name?")
-                .font(.system(size: 28, weight: .bold, design: .monospaced))
+                .font(.phoenixTitle(28))
                 .foregroundColor(PhoenixPalette.textPrimary)
                 .multilineTextAlignment(.center)
 
             TextField("Your name", text: $name)
-                .font(.system(.title2, design: .monospaced))
+                .font(.phoenixTitle(22))
                 .foregroundColor(PhoenixPalette.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding()
-                .kingdomGlass(cornerRadius: 16)
+                .phoenixGlass(cornerRadius: 16)
                 .padding(.horizontal, 32)
 
             Spacer()
@@ -197,7 +200,7 @@ struct OnboardingView: View {
             Spacer()
 
             Text("What are you training for?")
-                .font(.system(size: 26, weight: .bold, design: .monospaced))
+                .font(.phoenixTitle(26))
                 .foregroundColor(PhoenixPalette.textPrimary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
@@ -230,7 +233,7 @@ struct OnboardingView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(label)
-                        .font(.system(.headline, design: .monospaced))
+                        .font(.phoenixHeadline())
                         .foregroundColor(PhoenixPalette.textPrimary)
                     Text(subtitle)
                         .font(.system(.caption, design: .rounded))
@@ -255,37 +258,128 @@ struct OnboardingView: View {
 
     // MARK: - Page 5: Goal Detail
 
+    /// Preset quick-pick suggestions, tailored to the selected goal. Anything the
+    /// user types into the text box is appended here as an extra chip via `customGoalTags`,
+    /// so the two inputs (tap vs. type) both just produce more selectable options.
+    /// Skip the HealthKit permission page for a purely "productivity" goal —
+    /// only fitness/both goals actually use health data for planning, so
+    /// asking everyone for it made Health permission requests feel random.
+    private var pageAfterGoalDetail: Int {
+        (goal == "fitness" || goal == "both") ? 6 : 7
+    }
+
+    private var goalDetailPresets: [String] {
+        switch goal {
+        case "fitness":
+            return ["Running", "Gym & Strength", "Sports", "Cycling", "Swimming", "Yoga & Flexibility"]
+        case "productivity":
+            return ["Coding", "Studying", "Reading", "Writing", "Work Habits", "Deep Focus"]
+        default:
+            return ["Running", "Sports", "Coding", "Studying", "Gym & Strength", "Work Habits"]
+        }
+    }
+
+    private var allGoalDetailOptions: [String] {
+        goalDetailPresets + customGoalTags.filter { !goalDetailPresets.contains($0) }
+    }
+
+    private func addCustomGoalTag() {
+        let trimmed = goalDetailInput.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        goalDetailInput = ""
+        withAnimation(spring) {
+            if !allGoalDetailOptions.contains(where: { $0.caseInsensitiveCompare(trimmed) == .orderedSame }) {
+                customGoalTags.append(trimmed)
+            }
+            selectedGoalTags.insert(trimmed)
+        }
+    }
+
+    /// Every selected option, in display order, joined for `goalDetail` — this is
+    /// what's stored on the profile and sent to Foundation Models for planning.
+    private func syncGoalDetail() {
+        goalDetail = allGoalDetailOptions.filter(selectedGoalTags.contains).joined(separator: ", ")
+    }
+
     private var goalDetailPage: some View {
-        VStack(spacing: 32) {
-            Spacer()
+        VStack(spacing: 0) {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 28) {
+                    Spacer(minLength: 24)
 
-            VStack(spacing: 8) {
-                Text("Tell us more")
-                    .font(.system(size: 28, weight: .bold, design: .monospaced))
-                    .foregroundColor(PhoenixPalette.textPrimary)
+                    VStack(spacing: 8) {
+                        Text("Tell us more")
+                            .font(.phoenixTitle(28))
+                            .foregroundColor(PhoenixPalette.textPrimary)
 
-                Text("What's your specific goal?")
-                    .font(.system(.body, design: .rounded))
-                    .foregroundColor(PhoenixPalette.textSecondary)
+                        Text("Pick as many as apply — or add your own")
+                            .font(.system(.body, design: .rounded))
+                            .foregroundColor(PhoenixPalette.textSecondary)
+                    }
+
+                    OnboardingFlowLayout(spacing: 10) {
+                        ForEach(allGoalDetailOptions, id: \.self) { option in
+                            goalDetailChip(option)
+                        }
+                    }
+                    .padding(.horizontal, 32)
+
+                    TextField("Type your goal", text: $goalDetailInput)
+                        .font(.system(.body, design: .rounded))
+                        .foregroundColor(PhoenixPalette.textPrimary)
+                        .padding()
+                        .phoenixGlass(cornerRadius: 16)
+                        .submitLabel(.done)
+                        .onSubmit { addCustomGoalTag() }
+                        .padding(.horizontal, 32)
+
+                    Spacer(minLength: 24)
+                }
             }
 
-            TextField("e.g. make varsity tennis team", text: $goalDetail)
-                .font(.system(.body, design: .rounded))
-                .foregroundColor(PhoenixPalette.textPrimary)
-                .padding()
-                .kingdomGlass(cornerRadius: 16)
-                .padding(.horizontal, 32)
-
-            Spacer()
-
             VStack(spacing: 12) {
-                goldButton("Continue") { withAnimation(spring) { page = 6 } }
-                Button("Skip") { withAnimation(spring) { page = 6 } }
+                goldButton("Continue") { withAnimation(spring) { page = pageAfterGoalDetail } }
+                Button("Skip") { withAnimation(spring) { page = pageAfterGoalDetail } }
                     .font(.system(.caption, design: .rounded))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
             }
             .padding(.horizontal, 24)
+            .padding(.top, 12)
             .padding(.bottom, 48)
+        }
+        .onChange(of: selectedGoalTags) { _, _ in syncGoalDetail() }
+        .onChange(of: customGoalTags) { _, _ in syncGoalDetail() }
+    }
+
+    @ViewBuilder
+    private func goalDetailChip(_ label: String) -> some View {
+        let isSelected = selectedGoalTags.contains(label)
+        Button {
+            withAnimation(spring) {
+                if isSelected {
+                    selectedGoalTags.remove(label)
+                } else {
+                    selectedGoalTags.insert(label)
+                }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.caption.weight(.bold))
+                }
+                Text(label)
+            }
+            .font(.system(.subheadline, design: .rounded))
+            .foregroundColor(isSelected ? PhoenixPalette.textPrimary : PhoenixPalette.textSecondary)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 9)
+            .background(isSelected ? PhoenixPalette.success.opacity(0.18) : Color.white.opacity(0.03))
+            .overlay(
+                Capsule()
+                    .stroke(isSelected ? PhoenixPalette.success.opacity(0.6) : Color.white.opacity(0.08), lineWidth: 1)
+            )
+            .clipShape(Capsule())
         }
     }
 
@@ -346,6 +440,123 @@ struct OnboardingView: View {
         )
     }
 
+    // MARK: - Page 9: Accessibility
+
+    /// iOS has no public API for an app to toggle system VoiceOver — that
+    /// switch is deliberately OS-only, for the same reason no app can flip
+    /// on its own camera permission. What this page offers instead: the
+    /// parts of Rize's presentation the app itself controls (its own
+    /// animations, translucent cards, and text contrast), set once here and
+    /// changeable later from Profile → Accessibility, plus a direct link to
+    /// the system Settings that actually own VoiceOver / Larger Text / Bold
+    /// Text.
+    private var accessibilityPage: some View {
+        VStack(spacing: 0) {
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 28) {
+                    Spacer(minLength: 24)
+
+                    ZStack {
+                        Circle()
+                            .fill(Constants.accentColor.opacity(0.12))
+                            .frame(width: 120, height: 120)
+                        Image(systemName: "accessibility")
+                            .font(.system(size: 48))
+                            .foregroundColor(Constants.accentColor)
+                    }
+
+                    VStack(spacing: 12) {
+                        Text("Make it yours")
+                            .font(.phoenixTitle(26))
+                            .foregroundColor(PhoenixPalette.textPrimary)
+                            .multilineTextAlignment(.center)
+
+                        Text("Rize supports VoiceOver, Dynamic Type, and Bold Text out of the box — those live in iOS Settings. These three are Rize's own, and you can change them anytime from your profile.")
+                            .font(.system(.body, design: .rounded))
+                            .foregroundColor(PhoenixPalette.textSecondary)
+                            .multilineTextAlignment(.center)
+                            .lineSpacing(5)
+                            .padding(.horizontal, 32)
+                    }
+
+                    VStack(spacing: 14) {
+                        accessibilityToggleRow(
+                            icon: "figure.walk.motion",
+                            label: "Reduce Motion",
+                            subtitle: "Pause phoenix animations & particle effects",
+                            isOn: $obReduceMotion
+                        )
+                        accessibilityToggleRow(
+                            icon: "circle.lefthalf.filled",
+                            label: "Reduce Transparency",
+                            subtitle: "Solid cards instead of translucent ones",
+                            isOn: $obReduceTransparency
+                        )
+                        accessibilityToggleRow(
+                            icon: "circle.righthalf.filled",
+                            label: "High Contrast Text",
+                            subtitle: "Bolder, more legible text throughout",
+                            isOn: $obHighContrast
+                        )
+                    }
+                    .padding(.horizontal, 24)
+
+                    Button {
+                        if let url = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "gearshape.fill")
+                            Text("Open iOS Accessibility Settings")
+                        }
+                        .font(.system(.subheadline, design: .rounded).weight(.semibold))
+                        .foregroundColor(Constants.accentColor)
+                    }
+                    .accessibilityHint("Opens Settings for VoiceOver, Larger Text, and Bold Text")
+
+                    Spacer(minLength: 24)
+                }
+            }
+
+            goldButton("Finish") { finishOnboarding() }
+                .padding(.horizontal, 24)
+                .padding(.top, 12)
+                .padding(.bottom, 48)
+        }
+    }
+
+    @ViewBuilder
+    private func accessibilityToggleRow(icon: String, label: String, subtitle: String, isOn: Binding<Bool>) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundColor(Constants.accentColor)
+                .frame(width: 28)
+                .accessibilityHidden(true)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.phoenixHeadline())
+                    .foregroundColor(PhoenixPalette.textPrimary)
+                    .accessibilityHidden(true)
+                Text(subtitle)
+                    .font(.system(.caption, design: .rounded))
+                    .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                    .accessibilityHidden(true)
+            }
+            Spacer()
+
+            Toggle("", isOn: isOn)
+                .labelsHidden()
+                .tint(Constants.accentColor)
+                .accessibilityLabel(label)
+                .accessibilityHint(subtitle)
+        }
+        .padding(16)
+        .phoenixGlass(cornerRadius: 16)
+    }
+
     @ViewBuilder
     private func permissionPage(
         icon: String,
@@ -370,7 +581,7 @@ struct OnboardingView: View {
 
             VStack(spacing: 12) {
                 Text(title)
-                    .font(.system(size: 26, weight: .bold, design: .monospaced))
+                    .font(.phoenixTitle(26))
                     .foregroundColor(PhoenixPalette.textPrimary)
                     .multilineTextAlignment(.center)
 
@@ -400,7 +611,7 @@ struct OnboardingView: View {
     private func goldButton(_ label: String, disabled: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label)
-                .font(.system(.headline, design: .monospaced))
+                .font(.phoenixHeadline())
                 .foregroundColor(.black)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
@@ -416,12 +627,15 @@ struct OnboardingView: View {
         let profile = UserProfile(
             name: name.trimmingCharacters(in: .whitespaces),
             goal: goal,
-            goalDetail: goalDetail
+            goalDetail: goalDetail,
+            accessibilityReduceMotion: obReduceMotion,
+            accessibilityReduceTransparency: obReduceTransparency,
+            accessibilityHighContrast: obHighContrast
         )
-        modelContext.insert(profile)
-        try? modelContext.save()
+        profile.hasCompletedOnboarding = true
         withAnimation(spring) {
-            hasCompletedOnboarding = true
+            modelContext.insert(profile)
+            try? modelContext.save()
         }
     }
 }
@@ -502,7 +716,7 @@ private struct EnergySliderPreview: View {
             .frame(height: 22)
 
             Text("\(displayValue)")
-                .font(.system(.headline, design: .monospaced, weight: .bold))
+                .font(.phoenixHeadline())
                 .foregroundColor(Constants.energyColor(for: displayValue))
         }
         .onAppear {
@@ -513,74 +727,47 @@ private struct EnergySliderPreview: View {
     }
 }
 
-// MARK: - Onboarding Paywall
+// MARK: - Wrapping chip layout
 
-struct OnboardingPaywallView: View {
-    let onContinue: () -> Void
-    let onTrial: () -> Void
-    @EnvironmentObject private var subscriptionManager: SubscriptionManager
+/// Wraps chip-style subviews left-to-right, moving to a new row when they'd overflow.
+/// Also reused by `EditProfileView` for the same goal-tag chip picker.
+struct OnboardingFlowLayout: Layout {
+    var spacing: CGFloat = 8
 
-    var body: some View {
-        VStack(spacing: 28) {
-            Spacer()
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let maxWidth = proposal.width ?? .infinity
+        var rowWidth: CGFloat = 0
+        var totalHeight: CGFloat = 0
+        var rowHeight: CGFloat = 0
 
-            PhoenixTierVisual(tierIndex: 4, size: 160)
-
-            VStack(spacing: 8) {
-                Text("YOUR PHOENIX AWAITS")
-                    .font(.system(size: 22, weight: .black, design: .monospaced))
-                    .foregroundColor(PhoenixPalette.textPrimary)
-                    .multilineTextAlignment(.center)
-
-                Text("Start your 7-day free trial")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(PhoenixPalette.primary)
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if rowWidth + size.width > maxWidth, rowWidth > 0 {
+                totalHeight += rowHeight + spacing
+                rowWidth = 0
+                rowHeight = 0
             }
+            rowWidth += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
+        }
+        totalHeight += rowHeight
+        return CGSize(width: maxWidth.isFinite ? maxWidth : rowWidth, height: totalHeight)
+    }
 
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach([
-                    "Unlimited daily AI plans",
-                    "Calendar intel for tests & deadlines",
-                    "Weekly AI insights",
-                    "Gold streak protection",
-                    "Exclusive Pro phoenix glow"
-                ], id: \.self) { feature in
-                    HStack(spacing: 10) {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(PhoenixPalette.primary)
-                            .font(.system(.footnote, weight: .bold))
-                        Text(feature)
-                            .font(.system(.subheadline, design: .rounded))
-                            .foregroundColor(PhoenixPalette.textPrimary.opacity(0.8))
-                    }
-                }
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        var origin = bounds.origin
+        var rowHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if origin.x + size.width > bounds.maxX, origin.x > bounds.minX {
+                origin.x = bounds.minX
+                origin.y += rowHeight + spacing
+                rowHeight = 0
             }
-            .padding(.horizontal, 32)
-
-            Spacer()
-
-            VStack(spacing: 12) {
-                Button(action: onTrial) {
-                    Text("START FREE TRIAL")
-                        .font(.system(.headline, design: .monospaced))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(PhoenixPalette.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: Constants.cornerRadius))
-                }
-
-                Button("Continue with Free", action: onContinue)
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
-
-                Text("7-day free trial, then $4.99/month. Cancel anytime.")
-                    .font(.system(size: 10, design: .rounded))
-                    .foregroundColor(PhoenixPalette.textSecondary.opacity(0.4))
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 48)
+            subview.place(at: origin, proposal: .unspecified)
+            origin.x += size.width + spacing
+            rowHeight = max(rowHeight, size.height)
         }
     }
 }

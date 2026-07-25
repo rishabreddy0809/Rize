@@ -1,14 +1,15 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct ProfileView: View {
     @Query private var profiles: [UserProfile]
     @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var subscriptionManager: SubscriptionManager
     @EnvironmentObject private var xpManager: XPManager
     @EnvironmentObject private var notificationManager: NotificationManager
 
-    @State private var showPaywall = false
+    @State private var showEditProfile = false
+    @State private var showResetConfirmation = false
 
     private var profile: UserProfile? { profiles.first }
 
@@ -19,23 +20,20 @@ struct ProfileView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 16) {
                     headerCard
-                    ProStatusCard(profile: profile, showPaywall: $showPaywall)
                     phoenixStatsCard
                     settingsCard
-                    #if DEBUG
-                    DebugProToggle()
-                    DebugLowEnergyOverlayTrigger()
-                    DebugResetButton(profile: profile)
-                    DebugTierSelector(profile: profile)
-                    #endif
+                    accessibilityCard
+                    resetCard
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
                 .padding(.bottom, 32)
             }
         }
-        .sheet(isPresented: $showPaywall) {
-            PaywallView()
+        .sheet(isPresented: $showEditProfile) {
+            if let profile {
+                EditProfileView(profile: profile)
+            }
         }
     }
 
@@ -45,25 +43,43 @@ struct ProfileView: View {
         HStack(spacing: 14) {
             ZStack {
                 Circle()
-                    .fill(KingdomDesign.tierInfo(for: xpManager.totalXP).color.opacity(0.2))
+                    .fill(PhoenixDesign.tierInfo(for: xpManager.totalXP).color.opacity(0.2))
                     .frame(width: 56, height: 56)
                 Text(String(profile?.name.prefix(1) ?? "?").uppercased())
-                    .font(.system(size: 24, weight: .black, design: .monospaced))
+                    .font(.phoenixHero(24))
                     .foregroundColor(PhoenixPalette.textPrimary)
             }
+            // The avatar letter is a decorative echo of the name text right
+            // next to it — without this, VoiceOver would announce the name
+            // twice in a row (once for the letter, once for the full name).
+            .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(profile?.name ?? "Commander")
-                    .font(.system(.title3, design: .rounded, weight: .bold))
+                    .font(.phoenixTitle(20))
                     .foregroundColor(PhoenixPalette.textPrimary)
-                Text(KingdomDesign.tierInfo(for: xpManager.totalXP).name)
+                Text(PhoenixDesign.tierInfo(for: xpManager.totalXP).name)
                     .font(.system(size: 10, design: .monospaced))
-                    .foregroundColor(KingdomDesign.tierInfo(for: xpManager.totalXP).color)
+                    .foregroundColor(PhoenixDesign.tierInfo(for: xpManager.totalXP).color)
             }
+            // `.combine` merges the name + tier into one VoiceOver stop
+            // ("Commander, Ash") instead of two separate swipe targets.
+            .accessibilityElement(children: .combine)
             Spacer()
+
+            Button {
+                showEditProfile = true
+            } label: {
+                Image(systemName: "pencil.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+            }
+            .disabled(profile == nil)
+            .accessibilityLabel("Edit profile")
+            .accessibilityHint("Opens name and goal settings")
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 16)
+        .phoenixGlass(cornerRadius: 16)
     }
 
     // MARK: - Phoenix Stats
@@ -73,23 +89,24 @@ struct ProfileView: View {
             Text("PHOENIX STATS")
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                .accessibilityAddTraits(.isHeader)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 statCell("Total XP", value: "\(xpManager.totalXP)")
                 statCell("Total Tasks", value: "\(profile?.entries.reduce(0) { $0 + $1.tasksCompleted } ?? 0)")
                 statCell("Best Streak", value: "\(profile?.bestStreak ?? 0)d")
-                statCell("Gold Earned", value: "\(xpManager.gold)")
+                statCell("Best Week", value: "\(profile?.bestTasksCompletedInWeek ?? 0) tasks")
             }
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 16)
+        .phoenixGlass(cornerRadius: 16)
     }
 
     @ViewBuilder
     private func statCell(_ label: String, value: String) -> some View {
         VStack(spacing: 4) {
             Text(value)
-                .font(.system(.title3, design: .monospaced, weight: .bold))
+                .font(.phoenixTitle(20))
                 .foregroundColor(PhoenixPalette.textPrimary)
             Text(label)
                 .font(.system(size: 9, design: .monospaced))
@@ -99,6 +116,11 @@ struct ProfileView: View {
         .padding(.vertical, 12)
         .background(Color.white.opacity(0.03))
         .clipShape(RoundedRectangle(cornerRadius: 10))
+        // The value renders above the label visually, so `.combine` (which
+        // reads top-to-bottom) would announce "142, Total XP" — backwards.
+        // Overriding with an explicit label puts it in reading order instead.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(label): \(value)")
     }
 
     // MARK: - Settings
@@ -108,6 +130,7 @@ struct ProfileView: View {
             Text("SETTINGS")
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                .accessibilityAddTraits(.isHeader)
 
             if let profile = profile {
                 // Notification time
@@ -115,6 +138,7 @@ struct ProfileView: View {
                     Image(systemName: "bell.fill")
                         .foregroundColor(.yellow)
                         .frame(width: 24)
+                        .accessibilityHidden(true)
                     Text("Daily Reminder")
                         .font(.system(.subheadline, design: .rounded))
                         .foregroundColor(PhoenixPalette.textPrimary.opacity(0.8))
@@ -133,6 +157,7 @@ struct ProfileView: View {
                     )
                     .labelsHidden()
                     .tint(Constants.accentColor)
+                    .accessibilityLabel("Daily reminder time")
                 }
 
                 Divider().background(Color.white.opacity(0.07))
@@ -175,7 +200,7 @@ struct ProfileView: View {
             }
         }
         .padding(16)
-        .kingdomGlass(cornerRadius: 16)
+        .phoenixGlass(cornerRadius: 16)
     }
 
     @ViewBuilder
@@ -184,159 +209,128 @@ struct ProfileView: View {
             Image(systemName: icon)
                 .foregroundColor(color)
                 .frame(width: 24)
+                .accessibilityHidden(true)
+            // Visible label stays on screen for sighted users but is dropped
+            // from the accessibility tree — the Toggle below carries the same
+            // text as its own accessibility label, so keeping both would have
+            // VoiceOver announce "Apple Health Sync, Apple Health Sync, On".
             Text(label)
                 .font(.system(.subheadline, design: .rounded))
                 .foregroundColor(PhoenixPalette.textPrimary.opacity(0.8))
+                .accessibilityHidden(true)
             Spacer()
             Toggle("", isOn: isOn)
                 .labelsHidden()
                 .tint(Constants.accentColor)
+                .accessibilityLabel(label)
         }
     }
-}
 
-// MARK: - Pro Status Card
+    // MARK: - Accessibility
 
-struct ProStatusCard: View {
-    let profile: UserProfile?
-    @Binding var showPaywall: Bool
-    @EnvironmentObject private var subscriptionManager: SubscriptionManager
+    /// iOS doesn't expose a public API for an app to flip system VoiceOver
+    /// on/off — that's an OS-level toggle for privacy/security reasons (any
+    /// app silently enabling an assistive service on your behalf would be a
+    /// serious vulnerability). What this card offers instead: real switches
+    /// for the parts of Rize's presentation this app *does* control — its
+    /// own decorative animations, translucent surfaces, and contrast — plus
+    /// a direct link to iOS Settings for VoiceOver, Larger Text, and the
+    /// rest of the system-wide accessibility features.
+    private var accessibilityCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("ACCESSIBILITY")
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                .accessibilityAddTraits(.isHeader)
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            if subscriptionManager.isPro {
-                HStack {
-                    Text("PRO COMMANDER ✦")
-                        .font(.system(size: 13, weight: .bold, design: .monospaced))
-                        .foregroundColor(PhoenixPalette.eternal)
-                    Spacer()
-                }
-
-                if let start = profile?.proStartDate {
-                    Text("Member since \(start.formatted(date: .abbreviated, time: .omitted))")
-                        .font(.system(.caption, design: .rounded))
-                        .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
-                }
-
-                Button("Manage Subscription") {
-                    if let url = URL(string: "https://apps.apple.com/account/subscriptions") {
-                        UIApplication.shared.open(url)
-                    }
-                }
-                .font(.system(.caption, design: .rounded))
-                .foregroundColor(Constants.accentColor)
-            } else {
-                HStack {
-                    Text("FREE COMMANDER")
-                        .font(.system(size: 13, weight: .bold, design: .monospaced))
-                        .foregroundColor(PhoenixPalette.textSecondary)
-                    Spacer()
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Plans used this month")
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
-
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.white.opacity(0.07))
-                                .frame(height: 6)
-                            let used = Double(profile?.monthlyPlansUsed ?? 0)
-                            let limit = Double(Constants.freePlanLimitPerMonth)
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(used >= limit ? PhoenixPalette.destructive : Constants.accentColor)
-                                .frame(width: geo.size.width * min(1, used / limit), height: 6)
+            if let profile = profile {
+                settingToggle(
+                    icon: "figure.walk.motion",
+                    color: Constants.accentColor,
+                    label: "Reduce Motion",
+                    isOn: Binding(
+                        get: { profile.accessibilityReduceMotion },
+                        set: { val in
+                            profile.accessibilityReduceMotion = val
+                            try? modelContext.save()
                         }
-                    }
-                    .frame(height: 6)
-
-                    Text("\(profile?.monthlyPlansUsed ?? 0) / \(Constants.freePlanLimitPerMonth) this month")
-                        .font(.system(size: 10, design: .monospaced))
-                        .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
-                }
-
-                Button {
-                    showPaywall = true
-                } label: {
-                    Text("UPGRADE PHOENIX")
-                        .font(.system(.subheadline, design: .monospaced, weight: .bold))
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(PhoenixPalette.primary)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-            }
-        }
-        .padding(16)
-        .background(
-            subscriptionManager.isPro
-                ? PhoenixPalette.eternal.opacity(0.06)
-                : Color.white.opacity(0.03)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(
-                    subscriptionManager.isPro
-                        ? PhoenixPalette.eternal.opacity(0.3)
-                        : Color.white.opacity(0.07),
-                    lineWidth: 1
+                    )
                 )
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-}
+                .accessibilityHint("Pauses the phoenix animations and particle effects throughout the app")
 
-// MARK: - Debug Pro Toggle
+                Divider().background(Color.white.opacity(0.07))
 
-#if DEBUG
-struct DebugProToggle: View {
-    @EnvironmentObject private var subscriptionManager: SubscriptionManager
+                settingToggle(
+                    icon: "circle.lefthalf.filled",
+                    color: Constants.accentColor,
+                    label: "Reduce Transparency",
+                    isOn: Binding(
+                        get: { profile.accessibilityReduceTransparency },
+                        set: { val in
+                            profile.accessibilityReduceTransparency = val
+                            try? modelContext.save()
+                        }
+                    )
+                )
+                .accessibilityHint("Replaces translucent cards with solid backgrounds")
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("DEBUG")
-                .font(.system(size: 9, weight: .bold, design: .monospaced))
-                .foregroundColor(.red.opacity(0.6))
-            HStack {
-                Text("Pro Mode")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
-                Spacer()
-                Toggle("", isOn: Binding(
-                    get: { subscriptionManager.isPro },
-                    set: { val in subscriptionManager.isPro = val }
-                ))
-                .labelsHidden()
-                .tint(.red)
+                Divider().background(Color.white.opacity(0.07))
+
+                settingToggle(
+                    icon: "circle.righthalf.filled",
+                    color: Constants.accentColor,
+                    label: "High Contrast Text",
+                    isOn: Binding(
+                        get: { profile.accessibilityHighContrast },
+                        set: { val in
+                            profile.accessibilityHighContrast = val
+                            try? modelContext.save()
+                        }
+                    )
+                )
+                .accessibilityHint("Increases text contrast throughout the app")
+
+                Divider().background(Color.white.opacity(0.07))
             }
-        }
-        .padding(14)
-        .background(Color.red.opacity(0.04))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.red.opacity(0.15), lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-}
-
-// MARK: - Debug Reset Button
-
-struct DebugResetButton: View {
-    let profile: UserProfile?
-    @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var xpManager: XPManager
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @State private var showConfirmation = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("DEBUG — RESET")
-                .font(.system(size: 9, weight: .bold, design: .monospaced))
-                .foregroundColor(.red.opacity(0.6))
 
             Button {
-                showConfirmation = true
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "gearshape.fill")
+                        .foregroundColor(PhoenixPalette.textSecondary)
+                        .frame(width: 24)
+                        .accessibilityHidden(true)
+                    Text("VoiceOver, Larger Text & More")
+                        .font(.system(.subheadline, design: .rounded))
+                        .foregroundColor(PhoenixPalette.textPrimary.opacity(0.8))
+                    Spacer()
+                    Image(systemName: "arrow.up.forward")
+                        .font(.caption)
+                        .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
+                        .accessibilityHidden(true)
+                }
+            }
+            .accessibilityLabel("Open Settings")
+            .accessibilityHint("VoiceOver, Larger Text, Bold Text, and other system accessibility features live in iOS Settings, under Accessibility")
+        }
+        .padding(16)
+        .phoenixGlass(cornerRadius: 16)
+    }
+
+    // MARK: - Reset
+
+    private var resetCard: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("RESET")
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                .accessibilityAddTraits(.isHeader)
+
+            Button {
+                showResetConfirmation = true
             } label: {
                 Text("RESET EVERYTHING")
                     .font(.system(.subheadline, design: .monospaced, weight: .bold))
@@ -347,30 +341,29 @@ struct DebugResetButton: View {
                     .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.red.opacity(0.3), lineWidth: 1))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
             }
+            .accessibilityHint("Deletes XP, streaks, entries, and achievements, then returns to onboarding. This can't be undone.")
         }
-        .padding(14)
-        .background(Color.red.opacity(0.04))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.red.opacity(0.15), lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(16)
+        .phoenixGlass(cornerRadius: 16)
         .confirmationDialog(
             "Reset all progress?",
-            isPresented: $showConfirmation,
+            isPresented: $showResetConfirmation,
             titleVisibility: .visible
         ) {
             Button("Reset Everything", role: .destructive) { resetEverything() }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("XP, gold, streaks, entries, and achievements will be wiped and you'll return to onboarding.")
+            Text("XP, streaks, entries, and achievements will be wiped and you'll return to onboarding. This can't be undone.")
         }
     }
 
     private func resetEverything() {
-        // Kingdom state (XP, gold, defense, tier index, siege)
+        // Phoenix state (XP, defense, tier index, siege)
         xpManager.resetAll()
 
         // Delete the profile entirely — entries and tasks cascade-delete.
         // Onboarding creates a fresh one.
-        if let profile = profile {
+        if let profile {
             modelContext.delete(profile)
             try? modelContext.save()
         }
@@ -378,97 +371,7 @@ struct DebugResetButton: View {
         // One-off flags stored outside the profile
         UserDefaults.standard.removeObject(forKey: "lowEnergyBonusShownDate")
 
-        // Send the app back to onboarding
-        hasCompletedOnboarding = false
+        // No profile left with `hasCompletedOnboarding == true` — `RootView`
+        // (RizeApp.swift) routes back to onboarding automatically.
     }
 }
-
-// MARK: - Debug Tier Selector
-
-struct DebugTierSelector: View {
-    let profile: UserProfile?
-    @Environment(\.modelContext) private var modelContext
-    @EnvironmentObject private var xpManager: XPManager
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("DEBUG — JUMP TO TIER")
-                .font(.system(size: 9, weight: .bold, design: .monospaced))
-                .foregroundColor(.red.opacity(0.6))
-
-            HStack {
-                Text("Set Tier")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
-                Spacer()
-                Menu {
-                    ForEach(Array(KingdomDesign.tiers.enumerated()), id: \.offset) { _, tier in
-                        Button {
-                            jumpToTier(minXP: tier.minXP)
-                        } label: {
-                            Text("\(tier.name) (\(tier.minXP) XP)")
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 6) {
-                        Text(KingdomDesign.tierInfo(for: xpManager.totalXP).name)
-                            .font(.system(size: 11, weight: .bold, design: .monospaced))
-                            .foregroundColor(.white)
-                        Image(systemName: "chevron.up.chevron.down")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundColor(.white.opacity(0.5))
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.05))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                }
-            }
-        }
-        .padding(14)
-        .background(Color.red.opacity(0.04))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.red.opacity(0.15), lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func jumpToTier(minXP: Int) {
-        guard let profile = profile else { return }
-        // Add the remaining XP needed to reach the selected tier's threshold.
-        let remaining = minXP - profile.currentXP
-        if remaining > 0 {
-            profile.currentXP += remaining
-        } else {
-            profile.currentXP = minXP
-        }
-        try? modelContext.save()
-        xpManager.syncTotalXP(profile.currentXP)
-    }
-}
-
-// MARK: - Debug Low Energy Overlay Trigger
-
-struct DebugLowEnergyOverlayTrigger: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("DEBUG — PREVIEW")
-                .font(.system(size: 9, weight: .bold, design: .monospaced))
-                .foregroundColor(.red.opacity(0.6))
-            HStack {
-                Text("Low Energy Celebration")
-                    .font(.system(.subheadline, design: .rounded))
-                    .foregroundColor(.white.opacity(0.7))
-                Spacer()
-                Button("Show") {
-                    NotificationCenter.default.post(name: .rizeDebugShowLowEnergyOverlay, object: nil)
-                }
-                .font(.system(.caption, design: .monospaced, weight: .bold))
-                .foregroundColor(.red)
-            }
-        }
-        .padding(14)
-        .background(Color.red.opacity(0.04))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.red.opacity(0.15), lineWidth: 1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
-}
-#endif

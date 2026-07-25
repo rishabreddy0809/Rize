@@ -1,5 +1,17 @@
 import Foundation
 
+// Every type in this file is a plain Swift `struct`/`enum`, not a SwiftData
+// `@Model` — unlike `RizeTask`/`DailyEntry`/`UserProfile`, none of this is
+// persisted. It's the *pure* value-type output of `PlanningEngine` (see
+// `PlanningEngine.swift`), built fresh each time a plan is generated and
+// handed straight to the UI/narrator. `Sendable` on every type here is
+// Swift's concurrency-safety marker: it's a compile-time promise that a
+// value can be safely passed across actor/task boundaries (e.g. from the
+// engine's computation into a SwiftUI view or an `async` narrator call)
+// because it can't be mutated out from under another owner elsewhere —
+// straightforward for these since they're all immutable `let`-only structs
+// and simple enums.
+
 // MARK: - Deadline Classification
 
 /// How urgent a task's deadline is, relative to the plan's reference date.

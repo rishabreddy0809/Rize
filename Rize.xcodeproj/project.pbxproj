@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		587EB77AE06F221E20656B35 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D6FBB5B96A53FC9132197832 /* Foundation.framework */; };
 		AA000201 /* RizeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000200 /* RizeApp.swift */; };
 		AA000203 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000202 /* Constants.swift */; };
 		AA000205 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000204 /* Color+Hex.swift */; };
-		AA000207 /* KingdomDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000206 /* KingdomDesignSystem.swift */; };
+		AA000207 /* PhoenixDesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000206 /* PhoenixDesignSystem.swift */; };
+		8A7C51F352F7AA339B13696A /* AccessibilityPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8279A681AF3F1A230A5498AC /* AccessibilityPreferences.swift */; };
 		AA000209 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000208 /* UserProfile.swift */; };
 		AA000211 /* DailyEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000210 /* DailyEntry.swift */; };
 		AA000213 /* RizeTask.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000212 /* RizeTask.swift */; };
@@ -19,8 +21,7 @@
 		AA000221 /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000220 /* CalendarManager.swift */; };
 		AA000223 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000222 /* NotificationManager.swift */; };
 		AA000225 /* AchievementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000224 /* AchievementManager.swift */; };
-		AA000227 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000226 /* SubscriptionManager.swift */; };
-		AA000229 /* KingdomStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000228 /* KingdomStateManager.swift */; };
+		AA000229 /* PhoenixStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000228 /* PhoenixStateManager.swift */; };
 		AA000231 /* RyzDialogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000230 /* RyzDialogue.swift */; };
 		AA000233 /* ParticleSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000232 /* ParticleSystem.swift */; };
 		AA000235 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000234 /* OnboardingView.swift */; };
@@ -28,37 +29,92 @@
 		AA000239 /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000238 /* TodayView.swift */; };
 		AA000241 /* ProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000240 /* ProgressView.swift */; };
 		AA000243 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000242 /* ProfileView.swift */; };
-		AA000245 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000244 /* PaywallView.swift */; };
-		AA000247 /* KingdomTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000246 /* KingdomTabView.swift */; };
+		AA000571 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000570 /* EditProfileView.swift */; };
+		AA000247 /* PhoenixTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000246 /* PhoenixTabView.swift */; };
 		AA000251 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000250 /* Assets.xcassets */; };
-		AA000253 /* Rize.storekit in Resources */ = {isa = PBXBuildFile; fileRef = AA000252 /* Rize.storekit */; };
 		AA000261 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000260 /* HealthKit.framework */; };
 		AA000263 /* EventKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000262 /* EventKit.framework */; };
-		AA000265 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000264 /* StoreKit.framework */; };
 		AA000267 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA000266 /* UserNotifications.framework */; };
 		AA000282 /* MorphingTabBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000281 /* MorphingTabBar.swift */; };
-		AA000299 /* CoachingNarrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000298 /* CoachingNarrator.swift */; };
-		AA000301 /* TaskFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000300 /* TaskFactory.swift */; };
 		AA000286 /* MorphingTabProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000285 /* MorphingTabProtocol.swift */; };
-		AA000288 /* StravaTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000287 /* StravaTabView.swift */; };
-		AA000290 /* StravaManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000289 /* StravaManager.swift */; };
+		AA000288 /* HealthTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000287 /* HealthTabView.swift */; };
 		AA000293 /* PlanInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000292 /* PlanInput.swift */; };
 		AA000295 /* DailyPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000294 /* DailyPlan.swift */; };
 		AA000297 /* PlanningEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000296 /* PlanningEngine.swift */; };
+		AA000299 /* CoachingNarrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000298 /* CoachingNarrator.swift */; };
+		AA000301 /* TaskFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000300 /* TaskFactory.swift */; };
+		AA000402 /* AchievementUnlockedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000401 /* AchievementUnlockedView.swift */; };
+		AA000404 /* CelebrationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000403 /* CelebrationCenter.swift */; };
+		AA000406 /* WorkoutTaskMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000405 /* WorkoutTaskMatcher.swift */; };
+		AA000408 /* AddTaskSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000407 /* AddTaskSheet.swift */; };
 		AB3728C03007D5670021D221 /* Tier2.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728BF3007D5670021D221 /* Tier2.atlas */; };
 		AB3728C83009511B0021D221 /* Tier3.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728C73009511B0021D221 /* Tier3.atlas */; };
 		AB3728CA300C25CF0021D221 /* Tier4.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728C9300C25CF0021D221 /* Tier4.atlas */; };
 		AB7B176B3000050B0092E0D2 /* Tier1_Ashes.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB7B176A3000050B0092E0D2 /* Tier1_Ashes.atlas */; };
+		D1CAF7711F1D63619D8DD9DA /* Cinzel-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2AE4CCE830DE91F7D3E665D8 /* Cinzel-Regular.ttf */; };
+		B3A8926F5E282AC9E5BCBE9A /* Cinzel-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3B0F7DF3A02B5049D309F1EC /* Cinzel-Bold.ttf */; };
+		9D129F416F2376342958DD46 /* Cinzel-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7A480CFB14CAF6D26ECDBA6F /* Cinzel-ExtraBold.ttf */; };
+		290F36FAADD6401C073405EA /* Cinzel-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 577AB11F6CB4E6DA433B63B1 /* Cinzel-Black.ttf */; };
+		18BF043E450C3C476E9BE954 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 41AB0A02861AD285BC0792F3 /* PrivacyInfo.xcprivacy */; };
+		1DFD01C627DF4EF38E9C3446 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 3157A8AFB9205BFB39E986CF /* PrivacyInfo.xcprivacy */; };
 		BE9B254B2FFB14F800CE66E1 /* Phoenix.atlas in Resources */ = {isa = PBXBuildFile; fileRef = BE9B254A2FFB14F700CE66E1 /* Phoenix.atlas */; };
 		BE9B254D2FFB15A400CE66E1 /* PhoenixSprite.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE9B254C2FFB15A400CE66E1 /* PhoenixSprite.swift */; };
 		BE9B254F2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas in Resources */ = {isa = PBXBuildFile; fileRef = BE9B254E2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas */; };
+		D0472C15EC819821383C3C8C /* PlanningEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7A58AC3A1769F2ED70EDCC /* PlanningEngineTests.swift */; };
+		4CE219A06AF84114B25FC09B /* PersistenceIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 385ECEDE35304B8CB7C60AF5 /* PersistenceIntegrationTests.swift */; };
+		5F54EC0E1151EDE4957B6B8C /* ModelLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61612F824152353C87A4202 /* ModelLogicTests.swift */; };
+		31189D7AB751C823F8430F8B /* PhoenixDesignSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4C62022E6AE751DB6ABAB46 /* PhoenixDesignSystemTests.swift */; };
+		07AC7E9FA2E0F2DD0227FCBD /* WorkoutTaskMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35D06A737F960C1686A6245D /* WorkoutTaskMatcherTests.swift */; };
+		1778FCBC6B04F6A16BBA3382 /* UtilityExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73150C4AA2C45D991922843F /* UtilityExtensionTests.swift */; };
+		B7C9CD4F08E1E63DA9D3D20C /* CelebrationCenterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3631A56186A3583D2866FCB /* CelebrationCenterTests.swift */; };
+		AA000521 /* WidgetSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000520 /* WidgetSnapshotStore.swift */; };
+		AA000522 /* WidgetSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000520 /* WidgetSnapshotStore.swift */; };
+		AA000511 /* RizeWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000510 /* RizeWidgetBundle.swift */; };
+		AA000513 /* RizeWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000512 /* RizeWidgetProvider.swift */; };
+		AA000515 /* RizeHomeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000514 /* RizeHomeWidget.swift */; };
+		AA000517 /* RizeLockScreenWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000516 /* RizeLockScreenWidget.swift */; };
+		AA000561 /* RizeSportsWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000560 /* RizeSportsWidget.swift */; };
+		AA000532 /* RizeWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA000500 /* RizeWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeaderOnCopy, ); }; };
+		AA000551 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA000550 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A23C47123AED064033E7E415 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA000002;
+			remoteInfo = Rize;
+		};
+		AA000534 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA000501;
+			remoteInfo = RizeWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		AA000531 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				AA000532 /* RizeWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		AA000200 /* RizeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeApp.swift; sourceTree = "<group>"; };
 		AA000202 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		AA000204 /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
-		AA000206 /* KingdomDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KingdomDesignSystem.swift; sourceTree = "<group>"; };
+		AA000206 /* PhoenixDesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoenixDesignSystem.swift; sourceTree = "<group>"; };
+		8279A681AF3F1A230A5498AC /* AccessibilityPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilityPreferences.swift; sourceTree = "<group>"; };
 		AA000208 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		AA000210 /* DailyEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyEntry.swift; sourceTree = "<group>"; };
 		AA000212 /* RizeTask.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeTask.swift; sourceTree = "<group>"; };
@@ -67,8 +123,7 @@
 		AA000220 /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManager.swift; sourceTree = "<group>"; };
 		AA000222 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		AA000224 /* AchievementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementManager.swift; sourceTree = "<group>"; };
-		AA000226 /* SubscriptionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionManager.swift; sourceTree = "<group>"; };
-		AA000228 /* KingdomStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KingdomStateManager.swift; sourceTree = "<group>"; };
+		AA000228 /* PhoenixStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoenixStateManager.swift; sourceTree = "<group>"; };
 		AA000230 /* RyzDialogue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RyzDialogue.swift; sourceTree = "<group>"; };
 		AA000232 /* ParticleSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleSystem.swift; sourceTree = "<group>"; };
 		AA000234 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -76,43 +131,83 @@
 		AA000238 /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodayView.swift; sourceTree = "<group>"; };
 		AA000240 /* ProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressView.swift; sourceTree = "<group>"; };
 		AA000242 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-		AA000244 /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
-		AA000246 /* KingdomTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KingdomTabView.swift; sourceTree = "<group>"; };
+		AA000570 /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
+		AA000246 /* PhoenixTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoenixTabView.swift; sourceTree = "<group>"; };
 		AA000250 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		AA000252 /* Rize.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; name = Rize.storekit; path = ../Rize.storekit; sourceTree = "<group>"; };
 		AA000255 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		41AB0A02861AD285BC0792F3 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		3157A8AFB9205BFB39E986CF /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		AA000260 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		AA000262 /* EventKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = EventKit.framework; path = System/Library/Frameworks/EventKit.framework; sourceTree = SDKROOT; };
-		AA000264 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		AA000266 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
 		AA000270 /* Rize.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rize.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA000281 /* MorphingTabBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MorphingTabBar.swift; sourceTree = "<group>"; };
-		AA000298 /* CoachingNarrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingNarrator.swift; sourceTree = "<group>"; };
-		AA000300 /* TaskFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskFactory.swift; sourceTree = "<group>"; };
 		AA000285 /* MorphingTabProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = MorphingTabProtocol.swift; path = ../MorphingTabProtocol.swift; sourceTree = "<group>"; };
-		AA000287 /* StravaTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StravaTabView.swift; sourceTree = "<group>"; };
-		AA000289 /* StravaManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StravaManager.swift; sourceTree = "<group>"; };
+		AA000287 /* HealthTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthTabView.swift; sourceTree = "<group>"; };
 		AA000292 /* PlanInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanInput.swift; sourceTree = "<group>"; };
 		AA000294 /* DailyPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyPlan.swift; sourceTree = "<group>"; };
 		AA000296 /* PlanningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningEngine.swift; sourceTree = "<group>"; };
+		AA000298 /* CoachingNarrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingNarrator.swift; sourceTree = "<group>"; };
+		AA000300 /* TaskFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskFactory.swift; sourceTree = "<group>"; };
+		AA000401 /* AchievementUnlockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementUnlockedView.swift; sourceTree = "<group>"; };
+		AA000403 /* CelebrationCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationCenter.swift; sourceTree = "<group>"; };
+		AA000405 /* WorkoutTaskMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTaskMatcher.swift; sourceTree = "<group>"; };
+		AA000407 /* AddTaskSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTaskSheet.swift; sourceTree = "<group>"; };
 		AB3728BF3007D5670021D221 /* Tier2.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier2.atlas; sourceTree = "<group>"; };
 		AB3728C73009511B0021D221 /* Tier3.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier3.atlas; sourceTree = "<group>"; };
 		AB3728C9300C25CF0021D221 /* Tier4.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier4.atlas; sourceTree = "<group>"; };
 		AB7B176A3000050B0092E0D2 /* Tier1_Ashes.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier1_Ashes.atlas; sourceTree = "<group>"; };
+		2AE4CCE830DE91F7D3E665D8 /* Cinzel-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Cinzel-Regular.ttf"; sourceTree = "<group>"; };
+		3B0F7DF3A02B5049D309F1EC /* Cinzel-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Cinzel-Bold.ttf"; sourceTree = "<group>"; };
+		7A480CFB14CAF6D26ECDBA6F /* Cinzel-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Cinzel-ExtraBold.ttf"; sourceTree = "<group>"; };
+		577AB11F6CB4E6DA433B63B1 /* Cinzel-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Cinzel-Black.ttf"; sourceTree = "<group>"; };
 		BE9B254A2FFB14F700CE66E1 /* Phoenix.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Phoenix.atlas; sourceTree = "<group>"; };
 		BE9B254C2FFB15A400CE66E1 /* PhoenixSprite.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoenixSprite.swift; sourceTree = "<group>"; };
 		BE9B254E2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = PhoenixPerchedSmall.atlas; sourceTree = "<group>"; };
+		D6FBB5B96A53FC9132197832 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS26.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		EA7A58AC3A1769F2ED70EDCC /* PlanningEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlanningEngineTests.swift; sourceTree = "<group>"; };
+		385ECEDE35304B8CB7C60AF5 /* PersistenceIntegrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PersistenceIntegrationTests.swift; sourceTree = "<group>"; };
+		D61612F824152353C87A4202 /* ModelLogicTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelLogicTests.swift; sourceTree = "<group>"; };
+		A4C62022E6AE751DB6ABAB46 /* PhoenixDesignSystemTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoenixDesignSystemTests.swift; sourceTree = "<group>"; };
+		35D06A737F960C1686A6245D /* WorkoutTaskMatcherTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutTaskMatcherTests.swift; sourceTree = "<group>"; };
+		73150C4AA2C45D991922843F /* UtilityExtensionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UtilityExtensionTests.swift; sourceTree = "<group>"; };
+		E3631A56186A3583D2866FCB /* CelebrationCenterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CelebrationCenterTests.swift; sourceTree = "<group>"; };
+		F53D1E5FDD7B95D1E2A992B3 /* RizeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RizeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA000500 /* RizeWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = RizeWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA000510 /* RizeWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeWidgetBundle.swift; sourceTree = "<group>"; };
+		AA000512 /* RizeWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeWidgetProvider.swift; sourceTree = "<group>"; };
+		AA000514 /* RizeHomeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeHomeWidget.swift; sourceTree = "<group>"; };
+		AA000516 /* RizeLockScreenWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeLockScreenWidget.swift; sourceTree = "<group>"; };
+		AA000560 /* RizeSportsWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RizeSportsWidget.swift; sourceTree = "<group>"; };
+		AA000520 /* WidgetSnapshotStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotStore.swift; sourceTree = "<group>"; };
+		AA000523 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AA000524 /* RizeWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RizeWidgetExtension.entitlements; sourceTree = "<group>"; };
+		AA000550 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		838DA3DD6DFD16CAE6F553A4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				587EB77AE06F221E20656B35 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA000020 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				AA000261 /* HealthKit.framework in Frameworks */,
 				AA000263 /* EventKit.framework in Frameworks */,
-				AA000265 /* StoreKit.framework in Frameworks */,
 				AA000267 /* UserNotifications.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA000503 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +220,8 @@
 				AA000011 /* Rize */,
 				AA000012 /* Frameworks */,
 				AA000013 /* Products */,
+				C45455FD423A39DC4EC45EE3 /* RizeTests */,
+				AA000530 /* RizeWidget */,
 			);
 			sourceTree = "<group>";
 		};
@@ -143,16 +240,28 @@
 				AA000285 /* MorphingTabProtocol.swift */,
 				AA000250 /* Assets.xcassets */,
 				AA000255 /* Info.plist */,
-				AA000252 /* Rize.storekit */,
+				41AB0A02861AD285BC0792F3 /* PrivacyInfo.xcprivacy */,
 				AA000014 /* Extensions */,
-				AA000015 /* Kingdom */,
+				AA000015 /* Phoenix */,
 				AA000016 /* Models */,
 				AA000017 /* Services */,
 				AA000018 /* Components */,
 				AA000019 /* Views */,
 				AA000280 /* Helpers */,
+				BC1D591C44B163813538F90C /* Fonts */,
 			);
 			path = Rize;
+			sourceTree = "<group>";
+		};
+		BC1D591C44B163813538F90C /* Fonts */ = {
+			isa = PBXGroup;
+			children = (
+				2AE4CCE830DE91F7D3E665D8 /* Cinzel-Regular.ttf */,
+				3B0F7DF3A02B5049D309F1EC /* Cinzel-Bold.ttf */,
+				7A480CFB14CAF6D26ECDBA6F /* Cinzel-ExtraBold.ttf */,
+				577AB11F6CB4E6DA433B63B1 /* Cinzel-Black.ttf */,
+			);
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 		AA000012 /* Frameworks */ = {
@@ -160,8 +269,8 @@
 			children = (
 				AA000260 /* HealthKit.framework */,
 				AA000262 /* EventKit.framework */,
-				AA000264 /* StoreKit.framework */,
 				AA000266 /* UserNotifications.framework */,
+				E11C0DF8AA90A6E3CA0F616E /* iOS */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -170,6 +279,8 @@
 			isa = PBXGroup;
 			children = (
 				AA000270 /* Rize.app */,
+				F53D1E5FDD7B95D1E2A992B3 /* RizeTests.xctest */,
+				AA000500 /* RizeWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -182,12 +293,13 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
-		AA000015 /* Kingdom */ = {
+		AA000015 /* Phoenix */ = {
 			isa = PBXGroup;
 			children = (
-				AA000206 /* KingdomDesignSystem.swift */,
+				AA000206 /* PhoenixDesignSystem.swift */,
+				8279A681AF3F1A230A5498AC /* AccessibilityPreferences.swift */,
 			);
-			path = Kingdom;
+			path = Phoenix;
 			sourceTree = "<group>";
 		};
 		AA000016 /* Models */ = {
@@ -210,12 +322,13 @@
 				AA000220 /* CalendarManager.swift */,
 				AA000222 /* NotificationManager.swift */,
 				AA000224 /* AchievementManager.swift */,
-				AA000226 /* SubscriptionManager.swift */,
-				AA000228 /* KingdomStateManager.swift */,
-				AA000289 /* StravaManager.swift */,
+				AA000228 /* PhoenixStateManager.swift */,
+				AA000403 /* CelebrationCenter.swift */,
+				AA000405 /* WorkoutTaskMatcher.swift */,
 				AA000296 /* PlanningEngine.swift */,
 				AA000298 /* CoachingNarrator.swift */,
 				AA000300 /* TaskFactory.swift */,
+				AA000520 /* WidgetSnapshotStore.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -235,21 +348,23 @@
 				AA000234 /* OnboardingView.swift */,
 				AA000236 /* MainTabView.swift */,
 				AA000238 /* TodayView.swift */,
+				AA000401 /* AchievementUnlockedView.swift */,
+				AA000407 /* AddTaskSheet.swift */,
 				AA000240 /* ProgressView.swift */,
 				AA000242 /* ProfileView.swift */,
-				AA000244 /* PaywallView.swift */,
-				AA000287 /* StravaTabView.swift */,
-				AA000021 /* Kingdom */,
+				AA000570 /* EditProfileView.swift */,
+				AA000287 /* HealthTabView.swift */,
+				AA000021 /* Phoenix */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		AA000021 /* Kingdom */ = {
+		AA000021 /* Phoenix */ = {
 			isa = PBXGroup;
 			children = (
-				AA000246 /* KingdomTabView.swift */,
+				AA000246 /* PhoenixTabView.swift */,
 			);
-			path = Kingdom;
+			path = Phoenix;
 			sourceTree = "<group>";
 		};
 		AA000280 /* Helpers */ = {
@@ -258,6 +373,44 @@
 				AA000281 /* MorphingTabBar.swift */,
 			);
 			path = Helpers;
+			sourceTree = "<group>";
+		};
+		C45455FD423A39DC4EC45EE3 /* RizeTests */ = {
+			isa = PBXGroup;
+			children = (
+				EA7A58AC3A1769F2ED70EDCC /* PlanningEngineTests.swift */,
+				385ECEDE35304B8CB7C60AF5 /* PersistenceIntegrationTests.swift */,
+				D61612F824152353C87A4202 /* ModelLogicTests.swift */,
+				A4C62022E6AE751DB6ABAB46 /* PhoenixDesignSystemTests.swift */,
+				35D06A737F960C1686A6245D /* WorkoutTaskMatcherTests.swift */,
+				73150C4AA2C45D991922843F /* UtilityExtensionTests.swift */,
+				E3631A56186A3583D2866FCB /* CelebrationCenterTests.swift */,
+			);
+			path = RizeTests;
+			sourceTree = "<group>";
+		};
+		E11C0DF8AA90A6E3CA0F616E /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				D6FBB5B96A53FC9132197832 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		AA000530 /* RizeWidget */ = {
+			isa = PBXGroup;
+			children = (
+				AA000510 /* RizeWidgetBundle.swift */,
+				AA000512 /* RizeWidgetProvider.swift */,
+				AA000514 /* RizeHomeWidget.swift */,
+				AA000516 /* RizeLockScreenWidget.swift */,
+				AA000560 /* RizeSportsWidget.swift */,
+				AA000523 /* Info.plist */,
+				AA000524 /* RizeWidgetExtension.entitlements */,
+				AA000550 /* Assets.xcassets */,
+				3157A8AFB9205BFB39E986CF /* PrivacyInfo.xcprivacy */,
+			);
+			path = RizeWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -270,15 +423,52 @@
 				AA000022 /* Sources */,
 				AA000020 /* Frameworks */,
 				AA000023 /* Resources */,
+				AA000531 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				AA000533 /* PBXTargetDependency */,
 			);
 			name = Rize;
 			productName = Rize;
 			productReference = AA000270 /* Rize.app */;
 			productType = "com.apple.product-type.application";
+		};
+		B75C43A824D89504A8E2DE82 /* RizeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1CC910589A092985F65F0A06 /* Build configuration list for PBXNativeTarget "RizeTests" */;
+			buildPhases = (
+				95859C4C458EC8786D8E3C3D /* Sources */,
+				838DA3DD6DFD16CAE6F553A4 /* Frameworks */,
+				F0C4427DAD174CB09707C4A3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				486021DBA6433FF54600BE86 /* PBXTargetDependency */,
+			);
+			name = RizeTests;
+			productName = RizeTests;
+			productReference = F53D1E5FDD7B95D1E2A992B3 /* RizeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		AA000501 /* RizeWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA000542 /* Build configuration list for PBXNativeTarget "RizeWidgetExtension" */;
+			buildPhases = (
+				AA000502 /* Sources */,
+				AA000503 /* Frameworks */,
+				AA000504 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RizeWidgetExtension;
+			productName = RizeWidgetExtension;
+			productReference = AA000500 /* RizeWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -291,6 +481,9 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					AA000002 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					AA000501 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
@@ -309,6 +502,8 @@
 			projectRoot = "";
 			targets = (
 				AA000002 /* Rize */,
+				B75C43A824D89504A8E2DE82 /* RizeTests */,
+				AA000501 /* RizeWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -320,18 +515,52 @@
 			files = (
 				AB3728C83009511B0021D221 /* Tier3.atlas in Resources */,
 				AA000251 /* Assets.xcassets in Resources */,
-				AA000253 /* Rize.storekit in Resources */,
 				AB7B176B3000050B0092E0D2 /* Tier1_Ashes.atlas in Resources */,
 				BE9B254B2FFB14F800CE66E1 /* Phoenix.atlas in Resources */,
+				D1CAF7711F1D63619D8DD9DA /* Cinzel-Regular.ttf in Resources */,
+				B3A8926F5E282AC9E5BCBE9A /* Cinzel-Bold.ttf in Resources */,
+				9D129F416F2376342958DD46 /* Cinzel-ExtraBold.ttf in Resources */,
+				290F36FAADD6401C073405EA /* Cinzel-Black.ttf in Resources */,
 				AB3728C03007D5670021D221 /* Tier2.atlas in Resources */,
 				AB3728CA300C25CF0021D221 /* Tier4.atlas in Resources */,
 				BE9B254F2FFB16A100CE66E1 /* PhoenixPerchedSmall.atlas in Resources */,
+				18BF043E450C3C476E9BE954 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F0C4427DAD174CB09707C4A3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA000504 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000551 /* Assets.xcassets in Resources */,
+				1DFD01C627DF4EF38E9C3446 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		95859C4C458EC8786D8E3C3D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D0472C15EC819821383C3C8C /* PlanningEngineTests.swift in Sources */,
+				4CE219A06AF84114B25FC09B /* PersistenceIntegrationTests.swift in Sources */,
+				5F54EC0E1151EDE4957B6B8C /* ModelLogicTests.swift in Sources */,
+				31189D7AB751C823F8430F8B /* PhoenixDesignSystemTests.swift in Sources */,
+				07AC7E9FA2E0F2DD0227FCBD /* WorkoutTaskMatcherTests.swift in Sources */,
+				1778FCBC6B04F6A16BBA3382 /* UtilityExtensionTests.swift in Sources */,
+				B7C9CD4F08E1E63DA9D3D20C /* CelebrationCenterTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA000022 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -339,7 +568,8 @@
 				AA000201 /* RizeApp.swift in Sources */,
 				AA000203 /* Constants.swift in Sources */,
 				AA000205 /* Color+Hex.swift in Sources */,
-				AA000207 /* KingdomDesignSystem.swift in Sources */,
+				AA000207 /* PhoenixDesignSystem.swift in Sources */,
+				8A7C51F352F7AA339B13696A /* AccessibilityPreferences.swift in Sources */,
 				AA000209 /* UserProfile.swift in Sources */,
 				AA000211 /* DailyEntry.swift in Sources */,
 				AA000213 /* RizeTask.swift in Sources */,
@@ -349,32 +579,82 @@
 				AA000221 /* CalendarManager.swift in Sources */,
 				AA000223 /* NotificationManager.swift in Sources */,
 				AA000225 /* AchievementManager.swift in Sources */,
-				AA000227 /* SubscriptionManager.swift in Sources */,
-				AA000229 /* KingdomStateManager.swift in Sources */,
+				AA000229 /* PhoenixStateManager.swift in Sources */,
+				AA000404 /* CelebrationCenter.swift in Sources */,
+				AA000406 /* WorkoutTaskMatcher.swift in Sources */,
+				AA000408 /* AddTaskSheet.swift in Sources */,
 				AA000231 /* RyzDialogue.swift in Sources */,
 				AA000233 /* ParticleSystem.swift in Sources */,
 				AA000235 /* OnboardingView.swift in Sources */,
 				AA000237 /* MainTabView.swift in Sources */,
 				AA000239 /* TodayView.swift in Sources */,
+				AA000402 /* AchievementUnlockedView.swift in Sources */,
 				AA000241 /* ProgressView.swift in Sources */,
 				AA000243 /* ProfileView.swift in Sources */,
-				AA000245 /* PaywallView.swift in Sources */,
-				AA000247 /* KingdomTabView.swift in Sources */,
+				AA000571 /* EditProfileView.swift in Sources */,
+				AA000247 /* PhoenixTabView.swift in Sources */,
 				AA000282 /* MorphingTabBar.swift in Sources */,
 				AA000299 /* CoachingNarrator.swift in Sources */,
 				AA000301 /* TaskFactory.swift in Sources */,
 				AA000286 /* MorphingTabProtocol.swift in Sources */,
-				AA000288 /* StravaTabView.swift in Sources */,
-				AA000290 /* StravaManager.swift in Sources */,
+				AA000288 /* HealthTabView.swift in Sources */,
 				AA000293 /* PlanInput.swift in Sources */,
 				AA000295 /* DailyPlan.swift in Sources */,
 				AA000297 /* PlanningEngine.swift in Sources */,
+				AA000521 /* WidgetSnapshotStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AA000502 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA000511 /* RizeWidgetBundle.swift in Sources */,
+				AA000513 /* RizeWidgetProvider.swift in Sources */,
+				AA000515 /* RizeHomeWidget.swift in Sources */,
+				AA000517 /* RizeLockScreenWidget.swift in Sources */,
+				AA000561 /* RizeSportsWidget.swift in Sources */,
+				AA000522 /* WidgetSnapshotStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		486021DBA6433FF54600BE86 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Rize;
+			target = AA000002 /* Rize */;
+			targetProxy = A23C47123AED064033E7E415 /* PBXContainerItemProxy */;
+		};
+		AA000533 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA000501 /* RizeWidgetExtension */;
+			targetProxy = AA000534 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		4600CC3EA9D6E7C7C999E6E6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 36H2YJQAZ6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.RishabReddy.RizeAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rize.app/Rize";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		AA000030 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -441,9 +721,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Rize/Rize.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SYLM5655ZW;
+				DEVELOPMENT_TEAM = 36H2YJQAZ6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Rize/Info.plist;
@@ -454,7 +735,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.RishabReddy.Rize-Habit-App";
+				PRODUCT_BUNDLE_IDENTIFIER = com.RishabReddy.RizeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.9;
@@ -467,9 +748,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Rize/Rize.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = SYLM5655ZW;
+				DEVELOPMENT_TEAM = 36H2YJQAZ6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Rize/Info.plist;
@@ -480,8 +762,79 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.RishabReddy.Rize-Habit-App";
+				PRODUCT_BUNDLE_IDENTIFIER = com.RishabReddy.RizeApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		CC7FCA03B77E424B2B4DF7A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 36H2YJQAZ6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.RishabReddy.RizeAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rize.app/Rize";
+			};
+			name = Debug;
+		};
+		AA000540 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = RizeWidget/RizeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 36H2YJQAZ6;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RizeWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.RishabReddy.RizeApp.RizeWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA000541 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = RizeWidget/RizeWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 36H2YJQAZ6;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = RizeWidget/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.RishabReddy.RizeApp.RizeWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.9;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -491,6 +844,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1CC910589A092985F65F0A06 /* Build configuration list for PBXNativeTarget "RizeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4600CC3EA9D6E7C7C999E6E6 /* Release */,
+				CC7FCA03B77E424B2B4DF7A9 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AA000032 /* Build configuration list for PBXProject "Rize" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -505,6 +867,15 @@
 			buildConfigurations = (
 				AA000034 /* Debug */,
 				AA000035 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA000542 /* Build configuration list for PBXNativeTarget "RizeWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA000540 /* Debug */,
+				AA000541 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

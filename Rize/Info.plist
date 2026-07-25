@@ -2,10 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleDisplayName</key>
+	<string>Rize</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
@@ -16,6 +24,22 @@
 	<string>Rize uses your health data to personalize your daily plan based on your sleep, heart rate, and activity levels.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Rize reads your health data to generate better personalized daily plans.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<!-- Required for CloudKit's push-driven sync (NSPersistentCloudKitContainer)
+		     to import/export changes in the background rather than only on
+		     foreground launch — without this, CloudKit logs "BUG IN CLIENT OF
+		     CLOUDKIT: CloudKit push notifications require the 'remote-notification'
+		     background mode" and silent-push-triggered sync never fires. -->
+		<string>remote-notification</string>
+	</array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Cinzel-Regular.ttf</string>
+		<string>Cinzel-Bold.ttf</string>
+		<string>Cinzel-ExtraBold.ttf</string>
+		<string>Cinzel-Black.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

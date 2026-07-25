@@ -13,6 +13,17 @@ struct RizeCalendarEvent: Identifiable {
     let isDueSoon: Bool  // New property to indicate if the event is due soon
 }
 
+/// EventKit is Apple's framework for reading/writing the user's Calendar
+/// and Reminders data — `EKEventStore` (below) is its equivalent of
+/// `HKHealthStore` in `HealthKitManager`: one shared object you authorize
+/// once, then query through. The two frameworks' actual querying styles
+/// differ though, worth noting since `HealthKitManager` is `async` end to
+/// end while this one isn't: `store.events(matching:)` here is a
+/// synchronous, in-memory call — EventKit computes it directly from
+/// `predicateForEvents`, no `await` needed — so the `async` on
+/// `fetchUpcomingEvents`/`fetchTodaysEvents` below exists only because
+/// they're called from `async` contexts elsewhere (`RizeApp.onAppear`),
+/// not because they're doing asynchronous work themselves.
 @MainActor
 final class CalendarManager: ObservableObject {
     static let shared = CalendarManager()
@@ -36,6 +47,11 @@ final class CalendarManager: ObservableObject {
 
     func requestAuthorization() async {
         do {
+            // `requestFullAccessToEvents()` (iOS 17+) is EventKit's
+            // permission prompt — "full access" specifically (as opposed to
+            // the write-only variant apps use for e.g. just adding events)
+            // is required here since this reads event titles/dates back to
+            // build the day's plan, not just create events.
             let granted = try await store.requestFullAccessToEvents()
             isAuthorized = granted
             if granted {
@@ -49,16 +65,19 @@ final class CalendarManager: ObservableObject {
 
     // MARK: - Fetch Events
 
+    /// Events beyond this horizon are too far out to plan around — even on a
+    /// high-energy day we don't surface something due a year from now.
+    private static let upcomingWindowDays = 60
+
     func fetchUpcomingEvents() async {
         let now = Date()
-        let weekOut = Calendar.current.date(byAdding: .day, value: 7, to: now) ?? now
-        let predicate = store.predicateForEvents(withStart: now, end: weekOut, calendars: nil)
+        let horizon = Calendar.current.date(byAdding: .day, value: Self.upcomingWindowDays, to: now) ?? now
+        let predicate = store.predicateForEvents(withStart: now, end: horizon, calendars: nil)
         let rawEvents = store.events(matching: predicate)
 
         let calendar = Calendar.current
         upcomingEvents = rawEvents
             .filter { isRelevant($0) }
-            .prefix(10)
             .compactMap { event -> RizeCalendarEvent? in
                 let days = calendar.dateComponents([.day], from: now, to: event.startDate).day ?? 0
                 let isAcademic = isAcademicEvent(event)
@@ -110,7 +129,13 @@ final class CalendarManager: ObservableObject {
     }
 
     private func isHoliday(_ event: EKEvent) -> Bool {
-        event.calendar?.title.lowercased().contains("holiday") ?? false
+        if event.calendar?.type == .birthday { return true }
+        let haystacks = [
+            event.calendar?.title,
+            event.calendar?.source?.title,
+            event.title
+        ]
+        return haystacks.contains { $0?.lowercased().contains("holiday") ?? false }
     }
 
     private func isAcademicEvent(_ event: EKEvent) -> Bool {

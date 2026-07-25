@@ -98,11 +98,9 @@ enum SleepQuality: String, Sendable {
 
 // MARK: - Workout
 
-/// Where a workout came from. Lets us blend HealthKit and Strava without
-/// double-counting the same session downstream.
+/// Where a workout came from.
 enum WorkoutSource: String, Codable, Sendable {
     case healthKit
-    case strava
     case manual
 }
 
@@ -118,8 +116,13 @@ enum WorkoutIntensity: Int, Comparable, Sendable {
     }
 }
 
-/// A single completed workout, unified across HealthKit and Strava so the
-/// engine and UI share one model.
+/// A single point along a workout's GPS route.
+struct RouteCoordinate: Equatable, Sendable {
+    let latitude: Double
+    let longitude: Double
+}
+
+/// A single completed workout, as reported by HealthKit.
 struct WorkoutSummary: Identifiable, Equatable, Sendable {
     let id: UUID
     /// Human-readable activity type, e.g. "Run", "Ride", "Strength".
@@ -130,6 +133,14 @@ struct WorkoutSummary: Identifiable, Equatable, Sendable {
     let elevationGain: Double
     let averageHeartRate: Double?
     let source: WorkoutSource
+    /// Steps taken during the workout window, when the activity type tracks them.
+    let stepCount: Double?
+    /// Active calories burned (kcal), when HealthKit reports it for this workout.
+    let activeEnergyBurned: Double?
+    /// The device that recorded it, e.g. "Apple Watch SE".
+    let deviceName: String?
+    /// GPS route, if the workout has one. Empty for indoor/manual workouts.
+    let routeCoordinates: [RouteCoordinate]
 
     init(
         id: UUID = UUID(),
@@ -139,7 +150,11 @@ struct WorkoutSummary: Identifiable, Equatable, Sendable {
         movingTime: TimeInterval = 0,
         elevationGain: Double = 0,
         averageHeartRate: Double? = nil,
-        source: WorkoutSource = .manual
+        source: WorkoutSource = .manual,
+        stepCount: Double? = nil,
+        activeEnergyBurned: Double? = nil,
+        deviceName: String? = nil,
+        routeCoordinates: [RouteCoordinate] = []
     ) {
         self.id = id
         self.type = type
@@ -149,9 +164,42 @@ struct WorkoutSummary: Identifiable, Equatable, Sendable {
         self.elevationGain = elevationGain
         self.averageHeartRate = averageHeartRate
         self.source = source
+        self.stepCount = stepCount
+        self.activeEnergyBurned = activeEnergyBurned
+        self.deviceName = deviceName
+        self.routeCoordinates = routeCoordinates
     }
 
     var distanceKilometers: Double { distanceMeters / 1000 }
+    var distanceMiles: Double { distanceMeters / 1609.344 }
+
+    /// Whether this workout actually has a tracked distance — the signal
+    /// this app uses to decide "speed-trackable" (show distance/pace)
+    /// vs. not (show calories instead), rather than guessing from the
+    /// activity type name. A type-name whitelist would miss real cases
+    /// (e.g. an outdoor HIIT session that happens to have GPS) and
+    /// wrongly include others (an indoor cycling workout with no distance
+    /// recorded) — the actual data HealthKit reported is more reliable
+    /// than assuming from the label.
+    var hasTrackedDistance: Bool { distanceMeters > 0 }
+
+    /// "8:32 /mi" pace, or `nil` when there's no distance to divide by.
+    var formattedPace: String? {
+        guard distanceMiles > 0 else { return nil }
+        let secondsPerMile = Int((movingTime / distanceMiles).rounded())
+        guard secondsPerMile > 0 else { return nil }
+        return String(format: "%d:%02d /mi", secondsPerMile / 60, secondsPerMile % 60)
+    }
+
+    /// "57m 15s" / "1h 4m" style duration, matching Apple Fitness/Strava formatting.
+    var formattedMovingTime: String {
+        let totalSeconds = Int(movingTime.rounded())
+        let hours = totalSeconds / 3600
+        let minutes = (totalSeconds % 3600) / 60
+        let seconds = totalSeconds % 60
+        if hours > 0 { return "\(hours)h \(minutes)m" }
+        return "\(minutes)m \(seconds)s"
+    }
 
     /// Classify effort from distance and duration. Deterministic and
     /// intentionally conservative — a "hard" day should genuinely be hard.
@@ -206,6 +254,18 @@ enum EnergyBand: Sendable {
 
 /// The complete, deterministic input to `PlanningEngine`. Everything the engine
 /// needs is here — it reaches out to no singletons, frameworks, or clocks.
+///
+/// This is dependency injection as a design pattern: instead of the engine
+/// calling `Date()`, `HealthKitManager.shared`, `Calendar.current`, etc.
+/// directly whenever it needs "now" or "the user's workouts," every one of
+/// those is instead passed in as a plain value on this struct by whoever
+/// calls the engine (see `TodayView`/`XPManager`, which gather the real data
+/// from HealthKit/EventKit/SwiftData and assemble a `PlanInput` from it).
+/// The payoff is in `PlanningEngineTests.swift`: tests can construct a
+/// `PlanInput` with a fixed `referenceDate` and fabricated tasks/workouts,
+/// with no HealthKit/EventKit/SwiftData involved at all, and get the exact
+/// same output every time — the engine has no hidden inputs it could read
+/// from the outside world that a test doesn't control.
 struct PlanInput: Sendable {
     /// "Now". Injected so planning is deterministic and testable.
     var referenceDate: Date

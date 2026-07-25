@@ -30,6 +30,7 @@ enum ParticleType {
 struct ParticleEmitterView: View {
     let type: ParticleType
     @State private var particles: [Particle]
+    @Environment(\.rizeReduceMotion) private var reduceMotion
 
     private let duration: Double
 
@@ -55,6 +56,12 @@ struct ParticleEmitterView: View {
     }
 
     var body: some View {
+        // Purely decorative — with Reduce Motion on, skip the continuously
+        // redrawing `TimelineView` rather than freezing it mid-burst at some
+        // arbitrary opacity/position.
+        if reduceMotion {
+            EmptyView()
+        } else {
         TimelineView(.animation) { context in
             Canvas { context2, size in
                 let t = context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: duration) / duration
@@ -83,6 +90,7 @@ struct ParticleEmitterView: View {
             }
         }
         .allowsHitTesting(false)
+        }
     }
 
     private static func makeParticle(type: ParticleType) -> Particle {

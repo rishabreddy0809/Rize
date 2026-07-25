@@ -21,7 +21,10 @@ final class PhoenixNode: SKSpriteNode {
         let atlas = SKTextureAtlas(named: "Phoenix")
         // Sort so phoenix_000 … phoenix_263 play in order.
         let frames = atlas.textureNames.sorted().map { atlas.textureNamed($0) }
-        let node = PhoenixNode(texture: frames.first)
+        // Reduce Motion: hold on the settled in-flight frame (where the loop
+        // below normally starts) instead of playing the takeoff + endless loop.
+        let node = PhoenixNode(texture: AccessibilityState.reduceMotion ? frames[safe: 70] ?? frames.first : frames.first)
+        guard !AccessibilityState.reduceMotion else { return node }
         let fps = 1.0 / 24.0
         // Play the fire takeoff (frames 0–69) once, then loop the in-flight
         // portion from frame 70 onward so the bonfire only appears the
@@ -53,7 +56,7 @@ final class PhoenixScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = .clear
         view.allowsTransparency = true
-        scaleMode = .resizeFill
+        scaleMode = .aspectFit
 
         let phoenix = PhoenixNode.make()
         // The flight path is baked into the 264 frames (fixed Blender camera),
@@ -68,19 +71,25 @@ final class PhoenixScene: SKScene {
 }
 
 /// Drop-in SwiftUI view: transparent, non-interactive, loops forever.
+///
+/// The scene is created once, at the source frames' native 512×512 size, and
+/// held in `@State` so SwiftUI never rebuilds it mid-animation. Sizing to
+/// whatever frame the call site gives this view is left entirely to
+/// SpriteKit's `.aspectFit` scaling (set in `PhoenixScene.didMove`), which
+/// re-fits every frame — rather than a `GeometryReader` recreating a brand
+/// new scene (and re-running its one-time setup) on every SwiftUI re-render,
+/// which is what caused the sprite to intermittently render stretched to
+/// whatever transient size a mid-animation layout pass reported.
 struct PhoenixSpriteView: View {
+    @State private var scene: PhoenixScene = {
+        let scene = PhoenixScene(size: CGSize(width: 512, height: 512))
+        scene.backgroundColor = .clear
+        return scene
+    }()
+
     var body: some View {
-        GeometryReader { geo in
-            SpriteView(
-                scene: {
-                    let scene = PhoenixScene(size: geo.size)
-                    scene.backgroundColor = .clear
-                    return scene
-                }(),
-                options: [.allowsTransparency]
-            )
-        }
-        .allowsHitTesting(false)
+        SpriteView(scene: scene, options: [.allowsTransparency])
+            .allowsHitTesting(false)
     }
 }
 
@@ -94,6 +103,7 @@ final class PhoenixPerchedNode: SKSpriteNode {
         let atlas = SKTextureAtlas(named: "PhoenixPerchedSmall")
         let frames = atlas.textureNames.sorted().map { atlas.textureNamed($0) }
         let node = PhoenixPerchedNode(texture: frames.first)
+        guard !AccessibilityState.reduceMotion else { return node }
         let forward = SKAction.animate(with: frames, timePerFrame: 1.0 / 24.0)
         node.run(.repeatForever(.sequence([forward, forward.reversed()])))  // ~3.5s ping-pong
         return node
@@ -105,7 +115,7 @@ final class PhoenixPerchedScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = .clear
         view.allowsTransparency = true
-        scaleMode = .resizeFill
+        scaleMode = .aspectFit
         let phoenix = PhoenixPerchedNode.make()
         phoenix.setScale(min(size.width, size.height) / 512.0)
         phoenix.position = CGPoint(x: size.width * 0.5, y: size.height * 0.5)
@@ -129,18 +139,15 @@ final class PhoenixPerchedScene: SKScene {
 ///
 /// Remove `.allowsHitTesting(false)` below when you wire up tap reactions.
 struct PhoenixPerchedView: View {
+    @State private var scene: PhoenixPerchedScene = {
+        let scene = PhoenixPerchedScene(size: CGSize(width: 512, height: 512))
+        scene.backgroundColor = .clear
+        return scene
+    }()
+
     var body: some View {
-        GeometryReader { geo in
-            SpriteView(
-                scene: {
-                    let scene = PhoenixPerchedScene(size: geo.size)
-                    scene.backgroundColor = .clear
-                    return scene
-                }(),
-                options: [.allowsTransparency]
-            )
-        }
-        .allowsHitTesting(false)
+        SpriteView(scene: scene, options: [.allowsTransparency])
+            .allowsHitTesting(false)
     }
 }
 
@@ -161,6 +168,7 @@ final class Tier1AshesNode: SKSpriteNode {
         let atlas = SKTextureAtlas(named: "Tier1_Ashes")
         let frames = atlas.textureNames.sorted().map { atlas.textureNamed($0) }
         let node = Tier1AshesNode(texture: frames.first)
+        guard !AccessibilityState.reduceMotion else { return node }
         node.run(.repeatForever(.animate(with: frames, timePerFrame: 1.0 / 24.0)))
         return node
     }
@@ -171,7 +179,7 @@ final class Tier1AshesScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = .clear
         view.allowsTransparency = true
-        scaleMode = .resizeFill
+        scaleMode = .aspectFit
         let ash = Tier1AshesNode.make()
         ash.setScale(min(size.width, size.height) / 1024.0 * Tier1AshesNode.contentScale)
         // Ground the pile to the bottom of the box (anchor at its base, not its center)
@@ -187,18 +195,15 @@ final class Tier1AshesScene: SKScene {
 
 /// Drop-in SwiftUI view for the Tier 1 (Ash) card.
 struct Tier1AshesView: View {
+    @State private var scene: Tier1AshesScene = {
+        let scene = Tier1AshesScene(size: CGSize(width: 1024, height: 1024))
+        scene.backgroundColor = .clear
+        return scene
+    }()
+
     var body: some View {
-        GeometryReader { geo in
-            SpriteView(
-                scene: {
-                    let scene = Tier1AshesScene(size: geo.size)
-                    scene.backgroundColor = .clear
-                    return scene
-                }(),
-                options: [.allowsTransparency]
-            )
-        }
-        .allowsHitTesting(false)
+        SpriteView(scene: scene, options: [.allowsTransparency])
+            .allowsHitTesting(false)
     }
 }
 
@@ -212,7 +217,8 @@ final class Tier2FlameNode: SKSpriteNode {
     static func make() -> Tier2FlameNode {
         let atlas = SKTextureAtlas(named: "Tier2")
         let frames = atlas.textureNames.sorted().map { atlas.textureNamed($0) }
-        let node = Tier2FlameNode(texture: frames.first)
+        let node = Tier2FlameNode(texture: AccessibilityState.reduceMotion ? frames[safe: 24] ?? frames.first : frames.first)
+        guard !AccessibilityState.reduceMotion else { return node }
         let fps = 1.0 / 24.0
         let rise = SKAction.animate(with: frames, timePerFrame: fps)
         let loop = SKAction.repeatForever(
@@ -228,7 +234,7 @@ final class Tier2FlameScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = .clear
         view.allowsTransparency = true
-        scaleMode = .resizeFill
+        scaleMode = .aspectFit
         let flame = Tier2FlameNode.make()
         flame.setScale(min(size.width, size.height) / 1024.0)
         // Same floor-line anchoring as Tier1AshesScene, so the pile's base and the
@@ -241,18 +247,15 @@ final class Tier2FlameScene: SKScene {
 
 /// Drop-in SwiftUI view for the Tier 2 (Awakening) card.
 struct Tier2FlameView: View {
+    @State private var scene: Tier2FlameScene = {
+        let scene = Tier2FlameScene(size: CGSize(width: 1024, height: 1024))
+        scene.backgroundColor = .clear
+        return scene
+    }()
+
     var body: some View {
-        GeometryReader { geo in
-            SpriteView(
-                scene: {
-                    let scene = Tier2FlameScene(size: geo.size)
-                    scene.backgroundColor = .clear
-                    return scene
-                }(),
-                options: [.allowsTransparency]
-            )
-        }
-        .allowsHitTesting(false)
+        SpriteView(scene: scene, options: [.allowsTransparency])
+            .allowsHitTesting(false)
     }
 }
 
@@ -265,7 +268,8 @@ final class Tier3FlameNode: SKSpriteNode {
     static func make() -> Tier3FlameNode {
         let atlas = SKTextureAtlas(named: "Tier3")
         let frames = atlas.textureNames.sorted().map { atlas.textureNamed($0) }
-        let node = Tier3FlameNode(texture: frames.first)
+        let node = Tier3FlameNode(texture: AccessibilityState.reduceMotion ? frames[safe: 24] ?? frames.first : frames.first)
+        guard !AccessibilityState.reduceMotion else { return node }
         let fps = 1.0 / 24.0
         let rise = SKAction.animate(with: frames, timePerFrame: fps)
         let loop = SKAction.repeatForever(
@@ -281,7 +285,7 @@ final class Tier3FlameScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = .clear
         view.allowsTransparency = true
-        scaleMode = .resizeFill
+        scaleMode = .aspectFit
         let flame = Tier3FlameNode.make()
         flame.setScale(min(size.width, size.height) / 1024.0)
         // Same floor-line anchoring as Tier1/Tier2. The base-width correction (see
@@ -312,18 +316,17 @@ struct Tier3FlameView: View {
     // floors actually coincide, not just the (invisible) canvas edges.
     static let floorCompensation: CGFloat = 0.120
 
+    @State private var scene: Tier3FlameScene = {
+        let scene = Tier3FlameScene(size: CGSize(width: 1024, height: 1024))
+        scene.backgroundColor = .clear
+        return scene
+    }()
+
     var body: some View {
         GeometryReader { geo in
-            SpriteView(
-                scene: {
-                    let scene = Tier3FlameScene(size: geo.size)
-                    scene.backgroundColor = .clear
-                    return scene
-                }(),
-                options: [.allowsTransparency]
-            )
-            .scaleEffect(Self.contentScale, anchor: .bottom)
-            .offset(y: geo.size.height * Self.floorCompensation)
+            SpriteView(scene: scene, options: [.allowsTransparency])
+                .scaleEffect(Self.contentScale, anchor: .bottom)
+                .offset(y: geo.size.height * Self.floorCompensation)
         }
         .allowsHitTesting(false)
     }
@@ -336,7 +339,8 @@ final class Tier4FlameNode: SKSpriteNode {
     static func make() -> Tier4FlameNode {
         let atlas = SKTextureAtlas(named: "Tier4")
         let frames = atlas.textureNames.sorted().map { atlas.textureNamed($0) }
-        let node = Tier4FlameNode(texture: frames.first)
+        let node = Tier4FlameNode(texture: AccessibilityState.reduceMotion ? frames[safe: 24] ?? frames.first : frames.first)
+        guard !AccessibilityState.reduceMotion else { return node }
         let fps = 1.0 / 24.0
         let rise = SKAction.animate(with: frames, timePerFrame: fps)
         let loop = SKAction.repeatForever(
@@ -352,7 +356,7 @@ final class Tier4FlameScene: SKScene {
     override func didMove(to view: SKView) {
         backgroundColor = .clear
         view.allowsTransparency = true
-        scaleMode = .resizeFill
+        scaleMode = .aspectFit
         let flame = Tier4FlameNode.make()
         flame.setScale(min(size.width, size.height) / 307.0)
         flame.anchorPoint = CGPoint(x: 0.5, y: 0)
@@ -369,18 +373,17 @@ struct Tier4FlameView: View {
     static let contentScale: CGFloat = 1.0
     static let floorCompensation: CGFloat = 0.0
 
+    @State private var scene: Tier4FlameScene = {
+        let scene = Tier4FlameScene(size: CGSize(width: 307, height: 307))
+        scene.backgroundColor = .clear
+        return scene
+    }()
+
     var body: some View {
         GeometryReader { geo in
-            SpriteView(
-                scene: {
-                    let scene = Tier4FlameScene(size: geo.size)
-                    scene.backgroundColor = .clear
-                    return scene
-                }(),
-                options: [.allowsTransparency]
-            )
-            .scaleEffect(Self.contentScale, anchor: .bottom)
-            .offset(y: geo.size.height * Self.floorCompensation)
+            SpriteView(scene: scene, options: [.allowsTransparency])
+                .scaleEffect(Self.contentScale, anchor: .bottom)
+                .offset(y: geo.size.height * Self.floorCompensation)
         }
         .allowsHitTesting(false)
     }

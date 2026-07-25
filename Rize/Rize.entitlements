@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.healthkit</key>
+	<true/>
+	<key>com.apple.developer.healthkit.access</key>
+	<array/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.com.RishabReddy.RizeApp</string>
+	</array>
+	<!--
+	 The three keys below are what actually authorize CloudKit sync — without
+	 them, `cloudKitDatabase: .automatic` in RizeApp.swift's ModelContainer
+	 would fail at runtime, since the app has no permission to touch iCloud
+	 at all otherwise. Xcode would normally write these for you the moment
+	 you check "iCloud" → "CloudKit" under a target's Signing & Capabilities
+	 tab; they're added by hand here since this project's `.pbxproj` is
+	 hand-maintained rather than edited through Xcode's UI.
+	-->
+	<!-- Which CloudKit container(s) this app is allowed to use. "iCloud.<bundle id>"
+	     is the default naming Xcode generates automatically for a single-app
+	     container — this container has to exist under this app's Apple
+	     Developer team, which `CODE_SIGN_STYLE = Automatic` handles by
+	     provisioning it on first build/run rather than requiring a manual
+	     step on developer.apple.com. -->
+	<key>com.apple.developer.icloud-container-identifiers</key>
+	<array>
+		<string>iCloud.com.RishabReddy.RizeApp</string>
+	</array>
+	<!-- Which iCloud *feature* to enable for that container. "CloudKit" here
+	     is the raw database service SwiftData's sync sits on top of — as
+	     opposed to, say, "iCloud Documents" for file storage, which is a
+	     different iCloud feature entirely and not what SwiftData uses. -->
+	<key>com.apple.developer.icloud-services</key>
+	<array>
+		<string>CloudKit</string>
+	</array>
+	<!-- CloudKit containers have two separate environments, Development and
+	     Production, each with its own copy of the data — so records created
+	     while developing/debugging never mix with what real App Store users
+	     have synced. This has to be flipped to "Production" as part of the
+	     release build before shipping, or synced data won't carry over to
+	     the reviewed/shipped build's environment. -->
+	<key>com.apple.developer.icloud-container-environment</key>
+	<string>Development</string>
+</dict>
+</plist>
