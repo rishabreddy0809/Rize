@@ -44,6 +44,7 @@
 		AA000299 /* CoachingNarrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000298 /* CoachingNarrator.swift */; };
 		AA000301 /* TaskFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000300 /* TaskFactory.swift */; };
 		AA000402 /* AchievementUnlockedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000401 /* AchievementUnlockedView.swift */; };
+		1E5354F9D9D3BA3681C9B40C /* AchievementSharePlaque.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81D9FC9B623E3B0981C04F3D /* AchievementSharePlaque.swift */; };
 		AA000404 /* CelebrationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000403 /* CelebrationCenter.swift */; };
 		AA000406 /* WorkoutTaskMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000405 /* WorkoutTaskMatcher.swift */; };
 		AA000408 /* AddTaskSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000407 /* AddTaskSheet.swift */; };
@@ -150,6 +151,7 @@
 		AA000298 /* CoachingNarrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingNarrator.swift; sourceTree = "<group>"; };
 		AA000300 /* TaskFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskFactory.swift; sourceTree = "<group>"; };
 		AA000401 /* AchievementUnlockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementUnlockedView.swift; sourceTree = "<group>"; };
+		81D9FC9B623E3B0981C04F3D /* AchievementSharePlaque.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementSharePlaque.swift; sourceTree = "<group>"; };
 		AA000403 /* CelebrationCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationCenter.swift; sourceTree = "<group>"; };
 		AA000405 /* WorkoutTaskMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTaskMatcher.swift; sourceTree = "<group>"; };
 		AA000407 /* AddTaskSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTaskSheet.swift; sourceTree = "<group>"; };
@@ -349,6 +351,7 @@
 				AA000236 /* MainTabView.swift */,
 				AA000238 /* TodayView.swift */,
 				AA000401 /* AchievementUnlockedView.swift */,
+				81D9FC9B623E3B0981C04F3D /* AchievementSharePlaque.swift */,
 				AA000407 /* AddTaskSheet.swift */,
 				AA000240 /* ProgressView.swift */,
 				AA000242 /* ProfileView.swift */,
@@ -589,6 +592,7 @@
 				AA000237 /* MainTabView.swift in Sources */,
 				AA000239 /* TodayView.swift in Sources */,
 				AA000402 /* AchievementUnlockedView.swift in Sources */,
+				1E5354F9D9D3BA3681C9B40C /* AchievementSharePlaque.swift in Sources */,
 				AA000241 /* ProgressView.swift in Sources */,
 				AA000243 /* ProfileView.swift in Sources */,
 				AA000571 /* EditProfileView.swift in Sources */,

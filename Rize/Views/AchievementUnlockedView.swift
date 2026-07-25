@@ -7,6 +7,9 @@ import SwiftUI
 struct AchievementUnlockedView: View {
     let achievement: AchievementDefinition
     let onDismiss: () -> Void
+    /// Current streak, baked into the shareable plaque below — omitted from
+    /// the card entirely when 0 (day-one achievements have nothing to show).
+    var streak: Int = 0
 
     // Palette shorthands — the app's gold family.
     private let gold = PhoenixPalette.eternal      // #FFD700
@@ -18,6 +21,11 @@ struct AchievementUnlockedView: View {
     @State private var glowPulse = false
     @State private var phoenixRise = false
     @State private var badgeStamped = false
+    /// Rendered once on appear (see `AchievementShareRenderer`) rather than
+    /// on every `ShareLink` tap — `ImageRenderer` isn't free, and the
+    /// achievement/streak this card is built from can't change while this
+    /// view is on screen anyway.
+    @State private var shareImage: Image?
     @Environment(\.rizeReduceMotion) private var reduceMotion
 
     private var goldGradient: LinearGradient {
@@ -53,15 +61,37 @@ struct AchievementUnlockedView: View {
 
                 Spacer(minLength: 24)
 
-                Button(action: dismiss) {
-                    Text("CONTINUE")
-                        .font(.phoenixHeadline())
-                        .foregroundColor(.black)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(goldGradient)
-                        .clipShape(RoundedRectangle(cornerRadius: Constants.cornerRadius))
-                        .shadow(color: gold.opacity(0.4), radius: 16, y: 6)
+                VStack(spacing: 12) {
+                    if let shareImage {
+                        ShareLink(
+                            item: shareImage,
+                            preview: SharePreview(achievement.title, image: shareImage)
+                        ) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "square.and.arrow.up")
+                                Text("SHARE")
+                            }
+                            .font(.phoenixHeadline())
+                            .foregroundColor(gold)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: Constants.cornerRadius)
+                                    .stroke(goldGradient, lineWidth: 2)
+                            )
+                        }
+                    }
+
+                    Button(action: dismiss) {
+                        Text("CONTINUE")
+                            .font(.phoenixHeadline())
+                            .foregroundColor(.black)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(goldGradient)
+                            .clipShape(RoundedRectangle(cornerRadius: Constants.cornerRadius))
+                            .shadow(color: gold.opacity(0.4), radius: 16, y: 6)
+                    }
                 }
                 .padding(.horizontal, 28)
                 .padding(.bottom, 44)
@@ -69,7 +99,10 @@ struct AchievementUnlockedView: View {
             }
         }
         .ignoresSafeArea()
-        .onAppear(perform: animateIn)
+        .onAppear {
+            animateIn()
+            shareImage = AchievementShareRenderer.image(for: achievement, streak: streak)
+        }
     }
 
     // MARK: - Pieces

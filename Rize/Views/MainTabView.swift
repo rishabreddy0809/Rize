@@ -190,7 +190,11 @@ struct MainTabView: View {
         case .lowEnergy(let xp):
             LowEnergyCelebrationView(xp: xp, onDismiss: celebrationCenter.dismissActive)
         case .achievement(let achievement):
-            AchievementUnlockedView(achievement: achievement, onDismiss: celebrationCenter.dismissActive)
+            AchievementUnlockedView(
+                achievement: achievement,
+                onDismiss: celebrationCenter.dismissActive,
+                streak: profiles.first?.currentStreak ?? 0
+            )
         }
     }
 

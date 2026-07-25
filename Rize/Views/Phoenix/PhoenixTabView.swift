@@ -11,6 +11,9 @@ struct PhoenixView: View {
     @EnvironmentObject private var xpManager: XPManager
     @EnvironmentObject private var achievementManager: AchievementManager
     @State private var lowEnergyPage = 0
+    /// Which unlocked badge is currently up for re-share, if any — tapped
+    /// from the grid below.
+    @State private var sharingBadge: AchievementDefinition?
 
     private var profile: UserProfile? { profiles.first }
 
@@ -68,6 +71,9 @@ struct PhoenixView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 24)
             }
+        }
+        .sheet(item: $sharingBadge) { badge in
+            BadgeShareSheet(achievement: badge, streak: profile?.currentStreak ?? 0)
         }
     }
 
@@ -421,8 +427,15 @@ struct PhoenixView: View {
                 .frame(height: 24)
         }
         .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            guard unlocked else { return }
+            sharingBadge = badge
+        }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(badge.title), \(unlocked ? "unlocked" : "locked"). \(badge.description)")
+        .accessibilityHint(unlocked ? "Double tap to share this badge" : "")
+        .accessibilityAddTraits(unlocked ? [.isButton] : [])
     }
 
     // MARK: - Days That Built You
