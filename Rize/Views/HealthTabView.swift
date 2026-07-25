@@ -48,6 +48,8 @@ struct HealthTabView: View {
                     .font(.phoenixTitle(24))
                     .foregroundColor(PhoenixPalette.textPrimary)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
             Spacer()
             monthPicker
         }
@@ -97,6 +99,8 @@ struct HealthTabView: View {
             .padding(.vertical, 6)
             .phoenixGlass(cornerRadius: 12)
         }
+        .accessibilityLabel("Selected month: \(monthLabel(selectedMonth))")
+        .accessibilityHint("Opens a menu to choose a different month")
     }
 
     // MARK: - Health
@@ -107,6 +111,7 @@ struct HealthTabView: View {
                 Text("TODAY'S HEALTH")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 if !healthKit.isAvailable {
                     Text("UNAVAILABLE")
@@ -173,6 +178,7 @@ struct HealthTabView: View {
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
                 .padding(.horizontal, 4)
+                .accessibilityAddTraits(.isHeader)
 
             if healthKit.monthlyWorkouts.isEmpty {
                 Text("No workouts logged in \(monthLabel(selectedMonth)).")
@@ -203,6 +209,7 @@ struct HealthTabView: View {
                             .font(.system(.subheadline, design: .monospaced, weight: .bold))
                             .foregroundColor(.black)
                     )
+                    .accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(profile?.name ?? "You")
                         .font(.system(.subheadline, design: .rounded, weight: .semibold))
@@ -212,16 +219,19 @@ struct HealthTabView: View {
                         .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
                         .lineLimit(1)
                 }
+                .accessibilityElement(children: .combine)
                 Spacer()
             }
 
             HStack(spacing: 8) {
                 Image(systemName: workoutIcon(for: workout.type))
                     .foregroundColor(PhoenixPalette.textPrimary)
+                    .accessibilityHidden(true)
                 Text(workout.type)
                     .font(.system(.headline, design: .rounded, weight: .bold))
                     .foregroundColor(PhoenixPalette.textPrimary)
             }
+            .accessibilityAddTraits(.isHeader)
 
             workoutStatsRow(workout)
 
@@ -229,6 +239,10 @@ struct HealthTabView: View {
                 workoutMap(workout)
                     .frame(height: 160)
                     .clipShape(RoundedRectangle(cornerRadius: 14))
+                    // Static, non-interactive route preview — the distance/pace
+                    // stats above already say everything this map would add, so
+                    // it's decorative rather than informative for VoiceOver.
+                    .accessibilityHidden(true)
             }
         }
         .padding(14)
@@ -287,6 +301,7 @@ struct HealthTabView: View {
                 .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
     }
 
     /// `Map` is MapKit's SwiftUI view (iOS 17+) — it takes a `MapCameraPosition`

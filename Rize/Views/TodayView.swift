@@ -50,6 +50,7 @@ struct TodayView: View {
             .padding(.vertical, 3)
             .background(PhoenixPalette.destructive.opacity(0.12))
             .clipShape(Capsule())
+            .accessibilityElement(children: .combine)
         }
     }
 
@@ -182,10 +183,13 @@ struct TodayView: View {
             HStack(spacing: 4) {
                 Image(systemName: "flame.fill")
                     .foregroundColor(.orange)
+                    .accessibilityHidden(true)
                 Text("\(profile?.currentStreak ?? 0)")
                     .font(.phoenixHeadline())
                     .foregroundColor(PhoenixPalette.textPrimary)
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("\(profile?.currentStreak ?? 0) day streak")
 
             Spacer()
 
@@ -205,6 +209,7 @@ struct TodayView: View {
                 .padding(.vertical, 4)
                 .background(tierInfo.color.opacity(0.2))
                 .clipShape(Capsule())
+                .accessibilityLabel("Level \(PhoenixDesign.playerLevel(for: xpManager.totalXP))")
         }
         .padding(.horizontal, 4)
     }
@@ -215,6 +220,7 @@ struct TodayView: View {
         HStack(spacing: 12) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundColor(PhoenixPalette.destructive)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
                 Text("RETURNING TO ASH")
                     .font(.system(.caption, design: .monospaced, weight: .bold))
@@ -223,6 +229,7 @@ struct TodayView: View {
                     .font(.system(size: 11, design: .rounded))
                     .foregroundColor(PhoenixPalette.textSecondary)
             }
+            .accessibilityElement(children: .combine)
             Spacer()
         }
         .padding(14)
@@ -297,6 +304,8 @@ struct TodayView: View {
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
                 }
                 .padding(.horizontal, 24)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(tierInfo.nextMinXP.map { "\(xpManager.totalXP) of \($0) XP to next tier" } ?? "\(xpManager.totalXP) XP, max tier")
 
                 // Vitality row
                 VStack(spacing: 4) {
@@ -314,11 +323,13 @@ struct TodayView: View {
                         }
                     }
                     .frame(height: 5)
+                    .accessibilityHidden(true)
                     Text("\(xpManager.realmDefense)%")
                         .font(.system(size: 10, weight: .bold, design: .monospaced))
                         .foregroundColor(PhoenixDesign.defenseBarColor(xpManager.realmDefense))
                 }
                 .padding(.horizontal, 24)
+                .accessibilityElement(children: .combine)
 
                 dueSoonBadge
             }
@@ -337,6 +348,7 @@ struct TodayView: View {
                     Text("UPCOMING")
                         .font(.system(size: 10, weight: .bold, design: .monospaced))
                         .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
+                        .accessibilityAddTraits(.isHeader)
                     Spacer()
                     dueSoonBadge
                 }
@@ -346,6 +358,7 @@ struct TodayView: View {
                         Circle()
                             .fill(event.isUrgent ? PhoenixPalette.destructive : Color(hex: "0A84FF"))
                             .frame(width: 6, height: 6)
+                            .accessibilityHidden(true)
                         Text(event.title)
                             .font(.system(.caption, design: .rounded))
                             .foregroundColor(PhoenixPalette.textPrimary.opacity(0.8))
@@ -355,6 +368,7 @@ struct TodayView: View {
                             .font(.system(size: 9, weight: .bold, design: .monospaced))
                             .foregroundColor(event.isUrgent ? PhoenixPalette.destructive : PhoenixPalette.textSecondary.opacity(0.6))
                     }
+                    .accessibilityElement(children: .combine)
                 }
             }
             .padding(14)
@@ -433,9 +447,11 @@ struct TodayView: View {
             HStack {
                 Image(systemName: "bolt.fill")
                     .foregroundColor(tierInfo.color)
+                    .accessibilityHidden(true)
                 Text("TODAY'S PLAN")
                     .font(.system(size: 11, weight: .bold, design: .monospaced))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                    .accessibilityAddTraits(.isHeader)
                 dueSoonBadge
                 Spacer()
                 Text("\(entry.tasksCompleted)/\(entry.totalTasksForDay) done")
@@ -473,6 +489,7 @@ struct TodayView: View {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(PhoenixPalette.success)
+                        .accessibilityHidden(true)
                     Text("ALL DONE ✓")
                         .font(.phoenixHeadline())
                         .foregroundColor(PhoenixPalette.success)
@@ -542,6 +559,7 @@ struct TodayView: View {
             Image(systemName: group.icon)
                 .font(.system(size: 12, weight: .bold))
                 .foregroundColor(group.color)
+                .accessibilityHidden(true)
             Text(group.title.uppercased())
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundColor(group.color)
@@ -550,6 +568,8 @@ struct TodayView: View {
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundColor(group.color.opacity(0.6))
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
     }
 
     // MARK: - Coaching Card
@@ -652,6 +672,7 @@ struct TodayView: View {
         HStack(spacing: 8) {
             Image(systemName: "sparkles")
                 .foregroundColor(tierInfo.color)
+                .accessibilityHidden(true)
             Text("+\(xp) XP")
                 .font(.phoenixHeadline())
                 .foregroundColor(PhoenixPalette.textPrimary)
@@ -662,6 +683,7 @@ struct TodayView: View {
         .overlay(Capsule().stroke(tierInfo.color.opacity(0.5), lineWidth: 1))
         .clipShape(Capsule())
         .shadow(color: tierInfo.color.opacity(0.3), radius: 10)
+        .accessibilityElement(children: .combine)
     }
 
     private var ryzToast: some View {
@@ -1340,6 +1362,7 @@ struct EnergyPickerCard: View {
                 Text("HOW'S YOUR ENERGY?")
                     .font(.system(size: 12, weight: .bold, design: .monospaced))
                     .foregroundColor(PhoenixPalette.textSecondary)
+                    .accessibilityAddTraits(.isHeader)
                 Text("Be honest. There's no wrong answer.")
                     .font(.system(.caption, design: .rounded))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
@@ -1410,6 +1433,8 @@ struct EnergyPickerCard: View {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                         .scaleEffect(selectedEnergy == val ? 1.1 : 1.0)
                 }
+                .accessibilityLabel("Energy \(val)")
+                .accessibilityAddTraits(selectedEnergy == val ? [.isSelected] : [])
             }
         }
     }
@@ -1521,6 +1546,11 @@ struct TaskRowView: View {
             .clipShape(RoundedRectangle(cornerRadius: 14))
             .opacity(revealProgress)
             .allowsHitTesting(settledOffset != 0)
+            // Reachable instead via the "Delete" accessibility action on
+            // `rowContent` below — VoiceOver intercepts horizontal swipes for
+            // its own navigation, so this hand-built drag gesture is
+            // physically impossible to trigger with VoiceOver on.
+            .accessibilityHidden(true)
 
             rowContent
                 .offset(x: currentOffset)
@@ -1569,6 +1599,7 @@ struct TaskRowView: View {
                     .font(.system(size: 16))
                     .foregroundColor(category.color)
             }
+            .accessibilityHidden(true)
 
             // Title + duration
             VStack(alignment: .leading, spacing: 3) {
@@ -1617,9 +1648,23 @@ struct TaskRowView: View {
                 .animation(Constants.springAnimation, value: bouncing)
                 .animation(Constants.springAnimation, value: task.completed)
             }
+            // The row-level "Mark complete" accessibility action below covers
+            // this exact tap — hiding it here avoids VoiceOver landing on the
+            // same action twice as separate, confusingly identical stops.
+            .accessibilityHidden(true)
         }
         .padding(14)
         .phoenixGlass(cornerRadius: 14)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(task.title)
+        .accessibilityValue(task.completed ? "Completed. \(task.duration)." : task.duration)
+        .accessibilityAction(named: task.completed ? "Already completed" : "Mark complete") {
+            guard !task.completed else { return }
+            onComplete()
+        }
+        .accessibilityAction(named: "Delete") {
+            onDelete()
+        }
     }
 }
 

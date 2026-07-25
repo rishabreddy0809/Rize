@@ -83,6 +83,8 @@ struct PhoenixView: View {
                     .font(.phoenixTitle(24))
                     .foregroundColor(tierInfo.color)
             }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
             Spacer()
             Text("LV \(PhoenixDesign.playerLevel(for: xpManager.totalXP))")
                 .font(.system(size: 12, weight: .bold, design: .monospaced))
@@ -91,6 +93,7 @@ struct PhoenixView: View {
                 .padding(.vertical, 6)
                 .background(tierInfo.color.opacity(0.2))
                 .clipShape(Capsule())
+                .accessibilityLabel("Level \(PhoenixDesign.playerLevel(for: xpManager.totalXP))")
         }
         .padding(.horizontal, 4)
     }
@@ -122,6 +125,7 @@ struct PhoenixView: View {
                 Text("PHOENIX VITALITY")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 Text(xpManager.isUnderSiege ? "FADING" : "THRIVING")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
@@ -194,6 +198,7 @@ struct PhoenixView: View {
                 Text("PROGRESS")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 Text(nextTierName.map { "NEXT: \($0)" } ?? "MAX TIER")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
@@ -238,6 +243,7 @@ struct PhoenixView: View {
             Text("EVOLUTION")
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                .accessibilityAddTraits(.isHeader)
 
             ForEach(Array(PhoenixDesign.tiers.enumerated()), id: \.offset) { index, tier in
                 tierRow(index: index, tier: tier)
@@ -316,6 +322,7 @@ struct PhoenixView: View {
                 Text("BADGES")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 Text("\(unlockedIDs.count)/\(AchievementManager.all.count)")
                     .font(.system(size: 10, weight: .bold, design: .monospaced))
@@ -438,6 +445,8 @@ struct PhoenixView: View {
                         .font(.system(size: 10, design: .rounded))
                         .foregroundColor(PhoenixPalette.textSecondary.opacity(0.5))
                 }
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(.isHeader)
                 Spacer()
                 if lowEnergyPageCount > 1 {
                     HStack(spacing: 8) {
@@ -447,9 +456,11 @@ struct PhoenixView: View {
                             Image(systemName: "chevron.left")
                         }
                         .disabled(lowEnergyPage == 0)
+                        .accessibilityLabel("Previous days")
 
                         Text("\(lowEnergyPage + 1)/\(lowEnergyPageCount)")
                             .font(.system(size: 10, weight: .bold, design: .monospaced))
+                            .accessibilityHidden(true)
 
                         Button {
                             withAnimation(Constants.springAnimation) { lowEnergyPage = min(lowEnergyPageCount - 1, lowEnergyPage + 1) }
@@ -457,6 +468,7 @@ struct PhoenixView: View {
                             Image(systemName: "chevron.right")
                         }
                         .disabled(lowEnergyPage >= lowEnergyPageCount - 1)
+                        .accessibilityLabel("Next days")
                     }
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(PhoenixPalette.textPrimary.opacity(0.8))

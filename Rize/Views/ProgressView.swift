@@ -55,6 +55,8 @@ struct RizeProgressScreen: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 4)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isHeader)
     }
 
     // MARK: - Stats Row
@@ -83,6 +85,8 @@ struct RizeProgressScreen: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
         .phoenixGlass(cornerRadius: 12)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(label): \(value)")
     }
 
     // MARK: - Energy Chart
@@ -92,6 +96,7 @@ struct RizeProgressScreen: View {
             Text("ENERGY LAST 7 DAYS")
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                .accessibilityAddTraits(.isHeader)
 
             if last7Entries.isEmpty {
                 Text("No data yet. Start logging your energy!")
@@ -150,10 +155,25 @@ struct RizeProgressScreen: View {
                     }
                 }
                 .frame(height: 160)
+                // Swift Charts doesn't expose individual bars to VoiceOver in a
+                // useful way by default — treat the whole chart as one element
+                // with a spoken-out summary instead of silent/per-mark noise.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Energy over the last 7 days")
+                .accessibilityValue(energyChartSummary)
             }
         }
         .padding(16)
         .phoenixGlass(cornerRadius: 16)
+    }
+
+    /// "Monday 6, Tuesday 8, ..." — the same data the bar chart plots, read
+    /// as a sentence for the `accessibilityValue` above.
+    private var energyChartSummary: String {
+        last7Entries.compactMap { entry in
+            guard let energy = entry.energyScore else { return nil }
+            return "\(dayLabel(entry.date)) \(energy)"
+        }.joined(separator: ", ")
     }
 
     // MARK: - Weekly Insight
@@ -164,6 +184,7 @@ struct RizeProgressScreen: View {
                 Text("WEEKLY INSIGHT")
                     .font(.system(size: 11, weight: .bold, design: .monospaced))
                     .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
                 Button {
                     fetchInsight()
@@ -172,6 +193,7 @@ struct RizeProgressScreen: View {
                         .font(.caption)
                         .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
                 }
+                .accessibilityLabel("Refresh weekly insight")
             }
 
             if loadingInsight {
@@ -182,6 +204,8 @@ struct RizeProgressScreen: View {
                             .frame(width: 6, height: 6)
                     }
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Loading weekly insight")
             } else if weeklyInsight.isEmpty {
                 Text("Tap refresh to get your weekly AI insight.")
                     .font(.system(.caption, design: .rounded))
@@ -205,6 +229,7 @@ struct RizeProgressScreen: View {
             Text("PERSONAL BESTS")
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
                 .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                .accessibilityAddTraits(.isHeader)
 
             VStack(spacing: 10) {
                 bestRow("Best XP day", value: "\(profile?.bestXPDay ?? 0) XP", icon: "sparkles")
@@ -223,6 +248,7 @@ struct RizeProgressScreen: View {
                 .font(.system(size: 14))
                 .foregroundColor(Constants.accentColor)
                 .frame(width: 24)
+                .accessibilityHidden(true)
             Text(label)
                 .font(.system(.subheadline, design: .rounded))
                 .foregroundColor(PhoenixPalette.textPrimary.opacity(0.7))
@@ -232,6 +258,7 @@ struct RizeProgressScreen: View {
                 .fontWeight(.bold)
                 .foregroundColor(PhoenixPalette.textPrimary)
         }
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Helpers
