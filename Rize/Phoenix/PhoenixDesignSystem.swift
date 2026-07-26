@@ -226,10 +226,10 @@ enum PhoenixDesign {
 
     static let tiers: [(minXP: Int, name: String, color: Color)] = [
         (0,    "ASH",       PhoenixPalette.ash),
-        (501,  "AWAKENING", PhoenixPalette.awakening),
-        (1501, "RISING",    PhoenixPalette.rising),
-        (3501, "RADIANT",   PhoenixPalette.radiant),
-        (7001, "ETERNAL",   PhoenixPalette.eternal)
+        (500,  "AWAKENING", PhoenixPalette.awakening),
+        (1500, "RISING",    PhoenixPalette.rising),
+        (3500, "RADIANT",   PhoenixPalette.radiant),
+        (7000, "ETERNAL",   PhoenixPalette.eternal)
     ]
 
     static func tierInfo(for totalXP: Int) -> TierInfo {

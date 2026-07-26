@@ -76,12 +76,28 @@ struct MainTabView: View {
     @State private var isTabBarExpanded: Bool = false
     @State private var showAddTaskSheet = false
     @ObservedObject private var celebrationCenter = CelebrationCenter.shared
+    /// Toggled from Profile → Settings, or set during onboarding.
+    @AppStorage("mascot_enabled") private var mascotEnabled: Bool = true
 
     private var tierInfo: PhoenixDesign.TierInfo {
         PhoenixDesign.tierInfo(for: xpManager.totalXP)
     }
 
     private var tierColor: Color { tierInfo.color }
+
+    private var mascotContext: MascotContext {
+        let profile = profiles.first
+        let snapshot = HealthKitManager.shared.snapshot
+        return MascotContext(
+            name: profile?.name ?? "",
+            tierName: tierInfo.name,
+            streak: profile?.currentStreak ?? 0,
+            realmDefensePercent: xpManager.realmDefense,
+            isUnderSiege: xpManager.isUnderSiege,
+            sleepHours: snapshot.sleep?.hours,
+            lastWorkoutType: snapshot.recentWorkouts.first?.type
+        )
+    }
 
     /// Health only matters to people training for something — hide it for a
     /// purely "productivity" goal instead of showing an empty-feeling tab.
@@ -126,6 +142,13 @@ struct MainTabView: View {
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 16)
+
+            // Draggable tier mascot — persists across tab switches since it
+            // lives in this root ZStack, not inside any one tab's content.
+            if mascotEnabled {
+                MascotOverlay(tierIndex: tierInfo.index, context: mascotContext)
+                    .zIndex(15)
+            }
 
             // Celebrations — presented above the tab bar (not nested inside a
             // tab's own content) so the overlay truly covers the whole screen,

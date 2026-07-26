@@ -15,6 +15,10 @@ struct OnboardingView: View {
     @State private var obReduceMotion = false
     @State private var obReduceTransparency = false
     @State private var obHighContrast = false
+    /// Same `UserDefaults` key `MainTabView`/`ProfileView` use — a device
+    /// preference, not part of the synced `UserProfile`, so it's read/written
+    /// directly here rather than threaded through `finishOnboarding()`.
+    @AppStorage("mascot_enabled") private var obMascotEnabled: Bool = true
 
     private let spring = Constants.springAnimation
 
@@ -497,6 +501,12 @@ struct OnboardingView: View {
                             label: "High Contrast Text",
                             subtitle: "Bolder, more legible text throughout",
                             isOn: $obHighContrast
+                        )
+                        accessibilityToggleRow(
+                            icon: "bird.fill",
+                            label: "Floating Mascot",
+                            subtitle: "A small draggable phoenix that grows with your tier",
+                            isOn: $obMascotEnabled
                         )
                     }
                     .padding(.horizontal, 24)

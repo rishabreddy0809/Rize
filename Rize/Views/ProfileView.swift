@@ -11,6 +11,11 @@ struct ProfileView: View {
     @State private var showEditProfile = false
     @State private var showResetConfirmation = false
 
+    /// Same key `MainTabView` reads to decide whether to show `MascotOverlay`
+    /// at all, and the same key the onboarding accessibility page's toggle
+    /// writes to — one shared `UserDefaults` key, no extra plumbing needed.
+    @AppStorage("mascot_enabled") private var mascotEnabled: Bool = true
+
     private var profile: UserProfile? { profiles.first }
 
     var body: some View {
@@ -23,6 +28,9 @@ struct ProfileView: View {
                     phoenixStatsCard
                     settingsCard
                     accessibilityCard
+                    #if DEBUG
+                    debugTierCard
+                    #endif
                     resetCard
                 }
                 .padding(.horizontal, 16)
@@ -197,7 +205,18 @@ struct ProfileView: View {
                         }
                     )
                 )
+
+                Divider().background(Color.white.opacity(0.07))
             }
+
+            // Floating mascot toggle
+            settingToggle(
+                icon: "bird.fill",
+                color: Constants.accentColor,
+                label: "Floating Mascot",
+                isOn: $mascotEnabled
+            )
+            .accessibilityHint("Shows a small draggable phoenix that grows with your tier and offers encouragement when tapped")
         }
         .padding(16)
         .phoenixGlass(cornerRadius: 16)
@@ -319,6 +338,53 @@ struct ProfileView: View {
         .padding(16)
         .phoenixGlass(cornerRadius: 16)
     }
+
+    // MARK: - Debug
+
+    #if DEBUG
+    /// Debug-only — lets QA jump straight to any tier (mascot, phoenix
+    /// visuals, tier-locked copy, etc.) without grinding XP. Stripped from
+    /// release builds entirely by the `#if DEBUG`, not just hidden.
+    private var debugTierCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("DEBUG")
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundColor(PhoenixPalette.textSecondary.opacity(0.7))
+                .accessibilityAddTraits(.isHeader)
+
+            Menu {
+                ForEach(Array(PhoenixDesign.tiers.enumerated()), id: \.offset) { index, tier in
+                    Button {
+                        xpManager.setDebugTier(index: index)
+                    } label: {
+                        Label(tier.name.capitalized, systemImage: index == PhoenixDesign.tierInfo(for: xpManager.totalXP).index ? "checkmark" : "")
+                    }
+                }
+            } label: {
+                HStack {
+                    Image(systemName: "wand.and.stars")
+                        .foregroundColor(PhoenixDesign.tierInfo(for: xpManager.totalXP).color)
+                        .frame(width: 24)
+                        .accessibilityHidden(true)
+                    Text("Jump to Tier")
+                        .font(.system(.subheadline, design: .rounded))
+                        .foregroundColor(PhoenixPalette.textPrimary.opacity(0.8))
+                    Spacer()
+                    Text(PhoenixDesign.tierInfo(for: xpManager.totalXP).name.capitalized)
+                        .font(.system(.subheadline, design: .rounded, weight: .semibold))
+                        .foregroundColor(PhoenixPalette.textSecondary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                        .foregroundColor(PhoenixPalette.textSecondary.opacity(0.6))
+                }
+            }
+            .accessibilityLabel("Jump to tier, currently \(PhoenixDesign.tierInfo(for: xpManager.totalXP).name)")
+            .accessibilityHint("Sets your XP to test any tier's visuals without playing through it")
+        }
+        .padding(16)
+        .phoenixGlass(cornerRadius: 16)
+    }
+    #endif
 
     // MARK: - Reset
 

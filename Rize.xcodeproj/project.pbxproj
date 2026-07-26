@@ -42,6 +42,8 @@
 		AA000295 /* DailyPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000294 /* DailyPlan.swift */; };
 		AA000297 /* PlanningEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000296 /* PlanningEngine.swift */; };
 		AA000299 /* CoachingNarrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000298 /* CoachingNarrator.swift */; };
+		AA000601 /* MascotNarrator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000600 /* MascotNarrator.swift */; };
+		AA000603 /* MascotView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000602 /* MascotView.swift */; };
 		AA000301 /* TaskFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000300 /* TaskFactory.swift */; };
 		AA000402 /* AchievementUnlockedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000401 /* AchievementUnlockedView.swift */; };
 		1E5354F9D9D3BA3681C9B40C /* AchievementSharePlaque.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81D9FC9B623E3B0981C04F3D /* AchievementSharePlaque.swift */; };
@@ -149,6 +151,8 @@
 		AA000294 /* DailyPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyPlan.swift; sourceTree = "<group>"; };
 		AA000296 /* PlanningEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningEngine.swift; sourceTree = "<group>"; };
 		AA000298 /* CoachingNarrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachingNarrator.swift; sourceTree = "<group>"; };
+		AA000600 /* MascotNarrator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotNarrator.swift; sourceTree = "<group>"; };
+		AA000602 /* MascotView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MascotView.swift; sourceTree = "<group>"; };
 		AA000300 /* TaskFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskFactory.swift; sourceTree = "<group>"; };
 		AA000401 /* AchievementUnlockedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementUnlockedView.swift; sourceTree = "<group>"; };
 		81D9FC9B623E3B0981C04F3D /* AchievementSharePlaque.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementSharePlaque.swift; sourceTree = "<group>"; };
@@ -300,6 +304,7 @@
 			children = (
 				AA000206 /* PhoenixDesignSystem.swift */,
 				8279A681AF3F1A230A5498AC /* AccessibilityPreferences.swift */,
+				AA000602 /* MascotView.swift */,
 			);
 			path = Phoenix;
 			sourceTree = "<group>";
@@ -330,6 +335,7 @@
 				AA000296 /* PlanningEngine.swift */,
 				AA000298 /* CoachingNarrator.swift */,
 				AA000300 /* TaskFactory.swift */,
+				AA000600 /* MascotNarrator.swift */,
 				AA000520 /* WidgetSnapshotStore.swift */,
 			);
 			path = Services;
@@ -600,6 +606,8 @@
 				AA000282 /* MorphingTabBar.swift in Sources */,
 				AA000299 /* CoachingNarrator.swift in Sources */,
 				AA000301 /* TaskFactory.swift in Sources */,
+				AA000601 /* MascotNarrator.swift in Sources */,
+				AA000603 /* MascotView.swift in Sources */,
 				AA000286 /* MorphingTabProtocol.swift in Sources */,
 				AA000288 /* HealthTabView.swift in Sources */,
 				AA000293 /* PlanInput.swift in Sources */,

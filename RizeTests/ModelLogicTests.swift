@@ -13,10 +13,10 @@ final class ModelLogicTests: XCTestCase {
         profile.currentXP = 0
         XCTAssertEqual(profile.currentLevel, "ASH")
 
-        profile.currentXP = 501
+        profile.currentXP = 500
         XCTAssertEqual(profile.currentLevel, "AWAKENING")
 
-        profile.currentXP = 7001
+        profile.currentXP = 7000
         XCTAssertEqual(profile.currentLevel, "ETERNAL")
     }
 
@@ -26,8 +26,8 @@ final class ModelLogicTests: XCTestCase {
         profile.currentXP = 0
         XCTAssertEqual(profile.progressPercentage, 0.0, accuracy: 0.0001)
 
-        profile.currentXP = 500 // just below the Awakening threshold — nearly full bar
-        XCTAssertEqual(profile.progressPercentage, Double(500) / Double(501), accuracy: 0.0001)
+        profile.currentXP = 499 // just below the Awakening threshold — nearly full bar
+        XCTAssertEqual(profile.progressPercentage, Double(499) / Double(500), accuracy: 0.0001)
 
         // Eternal has no next tier — progress should read as complete (1.0),
         // not divide by a made-up ceiling and overshoot.

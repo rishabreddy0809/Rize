@@ -130,7 +130,7 @@ final class AchievementManager: ObservableObject {
         consider("realm_defender", history.count >= 7 && history.suffix(7).allSatisfy { $0.defended })
 
         consider("gold_hoarder", profile.bestTasksCompletedInWeek >= 25)
-        consider("unstoppable", profile.currentXP >= 7001)
+        consider("unstoppable", profile.currentXP >= 7000)
 
         let hour = Calendar.current.component(.hour, from: Date())
         consider("ghost_mode", hour >= 0 && hour < 4 && entry?.energyScore != nil)

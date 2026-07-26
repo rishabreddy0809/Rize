@@ -10,22 +10,22 @@ final class PhoenixDesignSystemTests: XCTestCase {
 
     func testTierInfoBoundariesAreInclusiveOnTheLowEnd() {
         XCTAssertEqual(PhoenixDesign.tierInfo(for: 0).name, "ASH")
-        XCTAssertEqual(PhoenixDesign.tierInfo(for: 500).name, "ASH", "500 is one below the Awakening threshold")
-        XCTAssertEqual(PhoenixDesign.tierInfo(for: 501).name, "AWAKENING")
-        XCTAssertEqual(PhoenixDesign.tierInfo(for: 1500).name, "AWAKENING")
-        XCTAssertEqual(PhoenixDesign.tierInfo(for: 1501).name, "RISING")
-        XCTAssertEqual(PhoenixDesign.tierInfo(for: 3501).name, "RADIANT")
-        XCTAssertEqual(PhoenixDesign.tierInfo(for: 7001).name, "ETERNAL")
+        XCTAssertEqual(PhoenixDesign.tierInfo(for: 499).name, "ASH", "499 is one below the Awakening threshold")
+        XCTAssertEqual(PhoenixDesign.tierInfo(for: 500).name, "AWAKENING")
+        XCTAssertEqual(PhoenixDesign.tierInfo(for: 1499).name, "AWAKENING")
+        XCTAssertEqual(PhoenixDesign.tierInfo(for: 1500).name, "RISING")
+        XCTAssertEqual(PhoenixDesign.tierInfo(for: 3500).name, "RADIANT")
+        XCTAssertEqual(PhoenixDesign.tierInfo(for: 7000).name, "ETERNAL")
     }
 
     func testTierInfoNextMinXPIsNilOnlyAtMaxTier() {
-        XCTAssertEqual(PhoenixDesign.tierInfo(for: 0).nextMinXP, 501)
-        XCTAssertEqual(PhoenixDesign.tierInfo(for: 7001).nextMinXP, nil)
+        XCTAssertEqual(PhoenixDesign.tierInfo(for: 0).nextMinXP, 500)
+        XCTAssertEqual(PhoenixDesign.tierInfo(for: 7000).nextMinXP, nil)
         XCTAssertEqual(PhoenixDesign.tierInfo(for: 999_999).nextMinXP, nil)
     }
 
     func testTierInfoIndexIncreasesMonotonically() {
-        let xps = [0, 501, 1501, 3501, 7001]
+        let xps = [0, 500, 1500, 3500, 7000]
         let indices = xps.map { PhoenixDesign.tierInfo(for: $0).index }
         XCTAssertEqual(indices, [0, 1, 2, 3, 4])
     }
