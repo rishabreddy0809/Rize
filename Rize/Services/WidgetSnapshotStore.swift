@@ -10,6 +10,14 @@ struct RizeWidgetTask: Codable, Identifiable {
     var completed: Bool
 }
 
+/// One GPS point along a workout's route, trimmed down to just lat/lon so
+/// the widget extension doesn't need `CoreLocation`/`RouteCoordinate` from
+/// the main app's model layer.
+struct RizeWidgetCoordinate: Codable {
+    var latitude: Double
+    var longitude: Double
+}
+
 /// One recent workout, trimmed to just what `RizeSportsWidget` displays —
 /// pre-formatted strings rather than raw numbers, so the widget doesn't need
 /// any of `WorkoutSummary`'s formatting logic (`formattedMovingTime`,
@@ -23,6 +31,10 @@ struct RizeWidgetWorkout: Codable, Identifiable {
     var subtitle: String
     /// e.g. "Today", "Yesterday", "3d ago".
     var relativeDay: String
+    /// GPS route, already thinned down to a widget-appropriate point count
+    /// (see `XPManager.refreshWidgetSnapshot`). Empty for indoor/manual
+    /// workouts, or when the workout carries no route.
+    var route: [RizeWidgetCoordinate] = []
 }
 
 struct RizeWidgetSnapshot: Codable {

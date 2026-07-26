@@ -72,6 +72,20 @@ final class XPManager: ObservableObject {
         dailyPlan = newPlan
     }
 
+    // MARK: - Debug
+
+    /// Jumps straight to a tier for QA — sets `totalXP` to that tier's floor
+    /// and `lastTierIndex` directly (no tier-up banner/animation, and no
+    /// clamping to "only moves forward" the way `syncTotalXP` does, since
+    /// testing needs to move down tiers too). Never called from production
+    /// gameplay code paths — only the debug picker in `ProfileView`.
+    func setDebugTier(index: Int) {
+        let tiers = PhoenixDesign.tiers
+        let clampedIndex = min(max(index, 0), tiers.count - 1)
+        totalXP = tiers[clampedIndex].minXP
+        lastTierIndex = clampedIndex
+    }
+
     // MARK: - Sync XP from profile
 
     func syncTotalXP(_ xp: Int) {
@@ -150,7 +164,10 @@ final class XPManager: ObservableObject {
         let widgetTasks = sortedTasks.prefix(maxWidgetTasks).map {
             RizeWidgetTask(id: $0.id.uuidString, title: $0.title, completed: $0.completed)
         }
-        let maxWidgetWorkouts = 4
+        // 8, not 4 — the large widget falls back to a longer workout list
+        // (rather than a route map) when nothing recent has GPS data, so it
+        // needs more than the map layout ever shows at once.
+        let maxWidgetWorkouts = 8
         let widgetWorkouts = recentWorkouts
             .sorted { $0.startDate > $1.startDate }
             .prefix(maxWidgetWorkouts)
@@ -159,7 +176,8 @@ final class XPManager: ObservableObject {
                     id: workout.id.uuidString,
                     type: workout.type,
                     subtitle: workoutSubtitle(workout),
-                    relativeDay: relativeDayLabel(workout.startDate)
+                    relativeDay: relativeDayLabel(workout.startDate),
+                    route: Self.thinnedRoute(workout.routeCoordinates)
                 )
             }
         WidgetSnapshotStore.save(RizeWidgetSnapshot(
@@ -207,6 +225,23 @@ final class XPManager: ObservableObject {
         case 1: return "Yesterday"
         default: return "\(days)d ago"
         }
+    }
+
+    /// Downsamples a route to a widget-appropriate point count — the shared
+    /// App Group `UserDefaults` store is meant for small bits of UI state,
+    /// not thousands of GPS points per workout, and a tiny widget map has no
+    /// use for full route-simplification fidelity (see
+    /// `HealthKitManager.fetchWorkoutRoute`'s Douglas-Peucker pass, which
+    /// already ran before this) — even stride sampling reads fine at this size.
+    private static let maxWidgetRoutePoints = 150
+    private static func thinnedRoute(_ coordinates: [RouteCoordinate]) -> [RizeWidgetCoordinate] {
+        guard coordinates.count > maxWidgetRoutePoints else {
+            return coordinates.map { RizeWidgetCoordinate(latitude: $0.latitude, longitude: $0.longitude) }
+        }
+        let stride = coordinates.count / maxWidgetRoutePoints
+        return coordinates.enumerated()
+            .filter { $0.offset % stride == 0 }
+            .map { RizeWidgetCoordinate(latitude: $0.element.latitude, longitude: $0.element.longitude) }
     }
 
     // MARK: - Day change

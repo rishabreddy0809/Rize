@@ -129,8 +129,14 @@ struct TodayView: View {
             autoCompleteTasksFromWorkouts()
             checkOverdueTasks()
         }
-        .onChange(of: healthKit.recentWorkouts) { _, _ in
+        .onChange(of: healthKit.recentWorkouts) { _, newWorkouts in
             autoCompleteTasksFromWorkouts()
+            xpManager.refreshWidgetSnapshot(
+                streak: profile?.currentStreak ?? 0,
+                tasks: todayEntry?.tasks ?? [],
+                sportsGoalEnabled: profile?.hasSportsGoal ?? false,
+                recentWorkouts: newWorkouts
+            )
         }
         // Scheduled tasks can quietly slip into the past while the app just
         // sits open — a 60s tick catches that without needing a relaunch.

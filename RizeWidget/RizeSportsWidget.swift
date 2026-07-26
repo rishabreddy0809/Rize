@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import MapKit
 
 /// A Home Screen widget surfacing recent workouts — only meaningful for
 /// people who actually have a sports/fitness goal (see
@@ -20,6 +21,8 @@ struct RizeSportsWidgetView: View {
         Group {
             if !entry.snapshot.sportsGoalEnabled {
                 emptyStateBody
+            } else if family == .systemLarge {
+                largeBody
             } else if family == .systemMedium {
                 mediumBody
             } else {
@@ -73,16 +76,68 @@ struct RizeSportsWidgetView: View {
     }
 
     // MARK: - Medium
+    //
+    // Split horizontally: the left half is the most recent workout's name
+    // and details (same list the small widget shows), the right half is a
+    // static MapKit render of that same workout's route — falling back to
+    // the plain list-only layout when there's no route to show (indoor/
+    // manual workouts), since an empty map half would just be dead space.
 
     private var mediumBody: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 4) {
-                Image(systemName: "figure.run")
-                    .foregroundStyle(WidgetPalette.primary)
-                Text("RECENT ACTIVITY")
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .foregroundStyle(WidgetPalette.textSecondary.opacity(0.7))
+        Group {
+            if let workout = entry.snapshot.recentWorkouts.first, !workout.route.isEmpty {
+                HStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        header("RECENT ACTIVITY")
+                        VStack(alignment: .leading, spacing: 7) {
+                            ForEach(entry.snapshot.recentWorkouts.prefix(3)) { workout in
+                                workoutRow(workout, compact: true)
+                            }
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+
+                    routeMap(workout.route)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 8) {
+                    header("RECENT ACTIVITY")
+                    if entry.snapshot.recentWorkouts.isEmpty {
+                        Spacer(minLength: 0)
+                        Text("No recent workouts — get moving to see them here.")
+                            .font(.system(size: 11, design: .rounded))
+                            .foregroundStyle(WidgetPalette.textSecondary.opacity(0.6))
+                        Spacer(minLength: 0)
+                    } else {
+                        // No route to show alongside the list (see the guard
+                        // above) — use the width that would've gone to the
+                        // map to show more of the user's recent workouts
+                        // instead, rather than leaving it blank.
+                        VStack(alignment: .leading, spacing: 7) {
+                            ForEach(entry.snapshot.recentWorkouts.prefix(5)) { workout in
+                                workoutRow(workout, compact: false)
+                            }
+                        }
+                    }
+                }
+                .padding(14)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
+        }
+    }
+
+    // MARK: - Large
+    //
+    // The full workout list plus a route map for the most recent workout
+    // that actually has one — the large widget is the only size with room
+    // for both without cramming either.
+
+    private var largeBody: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            header("RECENT ACTIVITY")
 
             if entry.snapshot.recentWorkouts.isEmpty {
                 Spacer(minLength: 0)
@@ -90,9 +145,22 @@ struct RizeSportsWidgetView: View {
                     .font(.system(size: 11, design: .rounded))
                     .foregroundStyle(WidgetPalette.textSecondary.opacity(0.6))
                 Spacer(minLength: 0)
-            } else {
+            } else if let routed = entry.snapshot.recentWorkouts.first(where: { !$0.route.isEmpty }) {
                 VStack(alignment: .leading, spacing: 7) {
-                    ForEach(entry.snapshot.recentWorkouts.prefix(3)) { workout in
+                    ForEach(entry.snapshot.recentWorkouts.prefix(4)) { workout in
+                        workoutRow(workout, compact: false)
+                    }
+                }
+
+                routeMap(routed.route)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: 120, maxHeight: .infinity)
+            } else {
+                // Nothing recent has a route — use the space a map would've
+                // taken to show more of the workout list instead.
+                VStack(alignment: .leading, spacing: 7) {
+                    ForEach(entry.snapshot.recentWorkouts.prefix(8)) { workout in
                         workoutRow(workout, compact: false)
                     }
                 }
@@ -100,6 +168,52 @@ struct RizeSportsWidgetView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    // MARK: - Route Map
+
+    private func routeMap(_ route: [RizeWidgetCoordinate]) -> some View {
+        let coordinates = route.map {
+            CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude)
+        }
+        return Map(initialPosition: .region(region(fitting: coordinates))) {
+            MapPolyline(coordinates: coordinates)
+                .stroke(WidgetPalette.primary, lineWidth: 3)
+        }
+        .mapStyle(.standard(elevation: .flat))
+        .mapControlVisibility(.hidden)
+        .allowsHitTesting(false)
+    }
+
+    /// Same bounding-box-fit approach as `HealthTabView.region(fitting:)` —
+    /// duplicated rather than shared since the widget extension and app are
+    /// separate compiled modules.
+    private func region(fitting coordinates: [CLLocationCoordinate2D]) -> MKCoordinateRegion {
+        guard let minLat = coordinates.map(\.latitude).min(),
+              let maxLat = coordinates.map(\.latitude).max(),
+              let minLon = coordinates.map(\.longitude).min(),
+              let maxLon = coordinates.map(\.longitude).max() else {
+            return MKCoordinateRegion(
+                center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+                span: MKCoordinateSpan(latitudeDelta: 1, longitudeDelta: 1)
+            )
+        }
+        let center = CLLocationCoordinate2D(latitude: (minLat + maxLat) / 2, longitude: (minLon + maxLon) / 2)
+        let span = MKCoordinateSpan(
+            latitudeDelta: max((maxLat - minLat) * 1.4, 0.01),
+            longitudeDelta: max((maxLon - minLon) * 1.4, 0.01)
+        )
+        return MKCoordinateRegion(center: center, span: span)
+    }
+
+    private func header(_ title: String) -> some View {
+        HStack(spacing: 4) {
+            Image(systemName: "figure.run")
+                .foregroundStyle(WidgetPalette.primary)
+            Text(title)
+                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .foregroundStyle(WidgetPalette.textSecondary.opacity(0.7))
+        }
     }
 
     // MARK: - Shared Row
@@ -162,6 +276,6 @@ struct RizeSportsWidget: Widget {
         }
         .configurationDisplayName("Recent Activity")
         .description("Your recent workouts, at a glance. Shows up once you set a fitness goal in Rize.")
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
