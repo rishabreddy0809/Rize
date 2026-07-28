@@ -740,6 +740,19 @@ struct TodayView: View {
             try? await Task.sleep(nanoseconds: 2_500_000_000)
             withAnimation { showRyzMessage = false }
         }
+
+        // Checked here, not just from `completeTask` — "ghost_mode" ("log
+        // your energy after midnight") depends on the hour energy was
+        // logged, which this is the only place that actually happens. Before
+        // this, a user who logged energy at 2am and completed a task at 9am
+        // would never unlock it, since the achievement check only ran at
+        // task-completion time (hour=9, condition false).
+        if let profile {
+            for achievement in achievementManager.check(profile: profile, entry: entry, xpManager: xpManager) {
+                celebrationCenter.enqueue(.achievement(achievement))
+            }
+        }
+
         generatePlan(entry: entry)
     }
 
@@ -1077,6 +1090,17 @@ struct TodayView: View {
         guard let profile = profile else { return }
         let result = xpManager.applyTaskCompletion(entry: entry, profile: profile)
 
+        // A nonzero bonus here means this exact completion broke a siege
+        // (isUnderSiege was true going in) — that's the "comeback" the
+        // COMEBACK KID achievement is for. Persisted on the entry, not just
+        // read from `result`, since achievement checks can run again later
+        // (e.g. on relaunch) after `result` is long gone.
+        if result.bonusXP > 0 {
+            entry.comebackBonusApplied = true
+        }
+
+        updateBestWeekTasks(profile: profile)
+
         try? modelContext.save()
         xpManager.refreshWidgetSnapshot(
             streak: profile.currentStreak,
@@ -1129,6 +1153,22 @@ struct TodayView: View {
 
     private func loadTodayEntry() {
         todayEntry = fetchEntry(for: Date())
+    }
+
+    /// Rolling 7-day (today + previous 6) sum of completed tasks, compared
+    /// against the profile's all-time best. Backs the "gold_hoarder"
+    /// achievement and the Progress tab's "Best week tasks" stat — neither
+    /// had any write path before this, so `bestTasksCompletedInWeek` stayed
+    /// 0 forever and that achievement was unreachable.
+    private func updateBestWeekTasks(profile: UserProfile) {
+        let calendar = Calendar.current
+        let windowStart = calendar.date(byAdding: .day, value: -6, to: calendar.startOfDay(for: Date())) ?? Date()
+        let descriptor = FetchDescriptor<DailyEntry>(predicate: #Predicate { $0.date >= windowStart })
+        let weekEntries = (try? modelContext.fetch(descriptor)) ?? []
+        let weekTotal = weekEntries.reduce(0) { $0 + $1.tasksCompleted }
+        if weekTotal > profile.bestTasksCompletedInWeek {
+            profile.bestTasksCompletedInWeek = weekTotal
+        }
     }
 
     private func fetchEntry(for date: Date) -> DailyEntry? {

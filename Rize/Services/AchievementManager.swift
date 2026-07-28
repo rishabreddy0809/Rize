@@ -127,7 +127,9 @@ final class AchievementManager: ObservableObject {
         consider("iron_will", profile.currentStreak >= 7)
 
         let history = xpManager.defenseHistory
-        consider("realm_defender", history.count >= 7 && history.suffix(7).allSatisfy { $0.defended })
+        // Actual vitality, not just "at least one task done that day" —
+        // `defended` alone doesn't mean vitality hit 100% (see `DefenseDay.defenseValue`).
+        consider("realm_defender", history.count >= 7 && history.suffix(7).allSatisfy { ($0.defenseValue ?? 0) >= 100 })
 
         consider("gold_hoarder", profile.bestTasksCompletedInWeek >= 25)
         consider("unstoppable", profile.currentXP >= 7000)

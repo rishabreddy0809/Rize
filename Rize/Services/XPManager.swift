@@ -13,6 +13,13 @@ struct TaskCompletionResult {
 struct DefenseDay: Codable {
     let date: String
     let defended: Bool
+    /// Actual Phoenix Vitality (0-100) at the end of this day. `defended`
+    /// alone only means "at least one task was completed that day" — not
+    /// that vitality actually reached 100% — which silently broke the
+    /// "realm_defender" (FLAME KEEPER) achievement's real intent ("keep
+    /// vitality at 100% for 7 days"). Optional so history JSON persisted
+    /// before this field existed still decodes (missing key -> nil).
+    var defenseValue: Int? = nil
 }
 
 @MainActor
@@ -317,7 +324,9 @@ final class XPManager: ObservableObject {
 
     private func appendDefenseHistory(defended: Bool) {
         var history = defenseHistory
-        history.append(DefenseDay(date: todayKey, defended: defended))
+        // `realmDefense` has already been updated by the caller (processDayChange)
+        // by the time this runs, so it reflects this day's final vitality.
+        history.append(DefenseDay(date: todayKey, defended: defended, defenseValue: realmDefense))
         if history.count > 7 { history = Array(history.suffix(7)) }
         if let data = try? JSONEncoder().encode(history),
            let str = String(data: data, encoding: .utf8) {
@@ -382,15 +391,7 @@ final class XPManager: ObservableObject {
         profile.currentXP += xpForTask
         entry.xpEarned += xpForTask
 
-        let tierBefore = PhoenixDesign.tierInfo(for: oldXP).name
-        let tierAfter = PhoenixDesign.tierInfo(for: profile.currentXP).name
-        let leveledUp = tierBefore != tierAfter
-
         updateStreak(profile: profile, completedCount: entry.tasksCompleted)
-
-        if profile.currentXP > profile.bestXPDay {
-            profile.bestXPDay = profile.currentXP
-        }
 
         let allDone = entry.isFullyComplete
         if allDone {
@@ -398,7 +399,30 @@ final class XPManager: ObservableObject {
             entry.xpEarned += Constants.allTasksBonus
         }
 
+        // Credit the siege-break bonus to real XP too — it used to only show
+        // up in the returned `xpDelta` (the toast the user sees) without
+        // ever actually being added to `profile.currentXP`, so the bonus was
+        // promised but never paid.
         let siegeResult = executeTaskCompletion(xp: xpForTask, energyScore: energy)
+        if siegeResult.bonusXP > 0 {
+            profile.currentXP += siegeResult.bonusXP
+            entry.xpEarned += siegeResult.bonusXP
+        }
+
+        // Computed after every addition above (task XP + all-done bonus +
+        // siege bonus) — checking this mid-way, before the later bonuses
+        // land, could miss a tier-up that one of them actually caused.
+        let tierBefore = PhoenixDesign.tierInfo(for: oldXP).name
+        let tierAfter = PhoenixDesign.tierInfo(for: profile.currentXP).name
+        let leveledUp = tierBefore != tierAfter
+
+        // Compared against the day's final earned total, not
+        // `profile.currentXP` (the all-time cumulative total, which only
+        // ever grows and would make "best day" converge to "lifetime XP").
+        if entry.xpEarned > profile.bestXPDay {
+            profile.bestXPDay = entry.xpEarned
+        }
+
         syncTotalXP(profile.currentXP)
 
         return TaskCompletionResult(

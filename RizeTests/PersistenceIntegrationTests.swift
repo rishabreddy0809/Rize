@@ -18,6 +18,14 @@ final class PersistenceIntegrationTests: XCTestCase {
         let configuration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
         container = try ModelContainer(for: schema, configurations: [configuration])
         context = ModelContext(container)
+
+        // XPManager.shared is a real singleton backed by UserDefaults (not
+        // reset by the fresh in-memory ModelContainer above) — reset the
+        // fields these tests touch so they're deterministic regardless of
+        // what a previous test run left behind.
+        XPManager.shared.isUnderSiege = false
+        XPManager.shared.realmDefense = 100
+        XPManager.shared.defenseHistoryJSON = "[]"
     }
 
     override func tearDownWithError() throws {
@@ -130,6 +138,110 @@ final class PersistenceIntegrationTests: XCTestCase {
         XCTAssertTrue(result.allTasksDone)
         XCTAssertEqual(result.xpDelta, expectedTaskXP + Constants.allTasksBonus)
         XCTAssertEqual(entry.xpEarned, expectedTaskXP + Constants.allTasksBonus)
+    }
+
+    /// Regression test: the siege-break bonus used to only appear in the
+    /// returned `xpDelta` (what the toast shows) without ever being added to
+    /// `profile.currentXP` — the bonus was promised but never paid.
+    func testApplyTaskCompletionCreditsSiegeBonusToRealXP() throws {
+        let profile = UserProfile(name: "Sky", goal: "fitness", goalDetail: "")
+        context.insert(profile)
+
+        let entry = DailyEntry(date: Date())
+        entry.profile = profile
+        entry.energyScore = 2 // <= 3 -> the larger (30 XP) siege-break bonus
+        entry.totalTasksForDay = 2
+        entry.tasksCompleted = 1
+        context.insert(entry)
+        try context.save()
+
+        XPManager.shared.isUnderSiege = true
+        let startingXP = profile.currentXP
+        let result = XPManager.shared.applyTaskCompletion(entry: entry, profile: profile)
+
+        XCTAssertTrue(result.siegeBroken)
+        XCTAssertEqual(result.bonusXP, 30, "energy <= 3 while under siege should award the 30 XP bonus")
+        XCTAssertEqual(
+            profile.currentXP, startingXP + result.xpDelta,
+            "the siege bonus reported in xpDelta must actually be credited to profile.currentXP, not just shown in the toast"
+        )
+        XCTAssertEqual(entry.xpEarned, result.xpDelta)
+    }
+
+    /// Regression test: `bestXPDay` used to compare against
+    /// `profile.currentXP` (the all-time cumulative total, which only ever
+    /// grows), so it silently converged to "lifetime XP" instead of "most
+    /// XP earned in any single day."
+    func testBestXPDayTracksSingleDayNotCumulativeTotal() throws {
+        let profile = UserProfile(name: "Drew", goal: "fitness", goalDetail: "")
+        context.insert(profile)
+
+        // Day 1: a big day — all tasks done, earns the all-tasks bonus too.
+        let day1 = DailyEntry(date: Date())
+        day1.profile = profile
+        day1.energyScore = 8 // high energy -> 1.0x multiplier
+        day1.totalTasksForDay = 1
+        day1.tasksCompleted = 1
+        context.insert(day1)
+        try context.save()
+        _ = XPManager.shared.applyTaskCompletion(entry: day1, profile: profile)
+
+        let bestAfterDay1 = profile.bestXPDay
+        XCTAssertEqual(bestAfterDay1, day1.xpEarned)
+        XCTAssertEqual(bestAfterDay1, Constants.baseXPPerTask + Constants.allTasksBonus)
+
+        // Day 2: a small day — a single task, nowhere near day 1's total.
+        let day2 = DailyEntry(date: Date())
+        day2.profile = profile
+        day2.energyScore = 8
+        day2.totalTasksForDay = 5
+        day2.tasksCompleted = 1
+        context.insert(day2)
+        try context.save()
+        _ = XPManager.shared.applyTaskCompletion(entry: day2, profile: profile)
+
+        XCTAssertEqual(profile.bestXPDay, bestAfterDay1, "a smaller day should not lower or replace the existing best-day record")
+        XCTAssertGreaterThan(
+            profile.currentXP, profile.bestXPDay,
+            "lifetime XP (both days combined) should now exceed the best single day — proving bestXPDay tracks per-day totals, not cumulative currentXP"
+        )
+    }
+
+    // MARK: - AchievementManager.realm_defender (actual vitality, not just "defended")
+
+    /// Regression test: `realm_defender` used to unlock off `DefenseDay.defended`
+    /// alone, which only means "completed >= 1 task that day" — not that
+    /// vitality actually reached 100%. Seven "defended" days starting from a
+    /// low vitality would unlock the achievement despite vitality never
+    /// hitting 100%.
+    func testRealmDefenderRequiresActualFullVitalityNotJustDefendedDays() throws {
+        let profile = UserProfile(name: "Taylor", goal: "fitness", goalDetail: "")
+        context.insert(profile)
+        let entry = DailyEntry(date: Date())
+        entry.profile = profile
+        context.insert(entry)
+        try context.save()
+
+        let defendedButNotFull = (0..<7).map { DefenseDay(date: "day\($0)", defended: true, defenseValue: 70) }
+        XPManager.shared.defenseHistoryJSON = try encodeHistory(defendedButNotFull)
+        let resultsBelowFull = AchievementManager.shared.check(profile: profile, entry: entry, xpManager: XPManager.shared)
+        XCTAssertFalse(
+            resultsBelowFull.contains { $0.id == "realm_defender" },
+            "7 'defended' days at 70% vitality should not unlock realm_defender"
+        )
+
+        let fullVitality = (0..<7).map { DefenseDay(date: "day\($0)", defended: true, defenseValue: 100) }
+        XPManager.shared.defenseHistoryJSON = try encodeHistory(fullVitality)
+        let resultsAtFull = AchievementManager.shared.check(profile: profile, entry: entry, xpManager: XPManager.shared)
+        XCTAssertTrue(
+            resultsAtFull.contains { $0.id == "realm_defender" },
+            "7 consecutive days at 100% vitality should unlock realm_defender"
+        )
+    }
+
+    private func encodeHistory(_ history: [DefenseDay]) throws -> String {
+        let data = try JSONEncoder().encode(history)
+        return String(data: data, encoding: .utf8) ?? "[]"
     }
 
     func testUpdateStreakResetsAfterGap() throws {
