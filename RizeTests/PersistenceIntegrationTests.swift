@@ -259,6 +259,56 @@ final class PersistenceIntegrationTests: XCTestCase {
         XCTAssertEqual(profile.bestStreak, 5, "best streak is a high-water mark and should not drop")
     }
 
+    // MARK: - AchievementManager.iron_will vs perfect_week
+
+    /// Regression test: `iron_will` used to check `currentStreak >= 7`,
+    /// identical to `perfect_week` — so a streak that later reset would
+    /// silently "lose" a milestone the user genuinely earned. `bestStreak`
+    /// is a permanent high-water mark, so reaching 7 once keeps it unlocked
+    /// even after the live streak drops.
+    func testIronWillUsesBestStreakSoItSurvivesAStreakReset() throws {
+        let profile = UserProfile(name: "Robin", goal: "fitness", goalDetail: "")
+        profile.currentStreak = 2 // reset since the 7-day milestone
+        profile.bestStreak = 7
+        context.insert(profile)
+        let entry = DailyEntry(date: Date())
+        entry.profile = profile
+        context.insert(entry)
+        try context.save()
+
+        let unlocked = AchievementManager.shared.check(profile: profile, entry: entry, xpManager: XPManager.shared)
+
+        XCTAssertTrue(
+            unlocked.contains { $0.id == "iron_will" },
+            "a currentStreak of 2 should still unlock iron_will off the permanent bestStreak of 7"
+        )
+    }
+
+    /// Regression test: `perfect_week` used to be a duplicate of
+    /// `iron_will` (`currentStreak >= 7`) instead of its own, stricter
+    /// condition (every task done on each of the last 7 days). It's now
+    /// computed by the caller and passed in as `isPerfectWeek`.
+    func testPerfectWeekRequiresExplicitFlagNotJustStreak() throws {
+        let profile = UserProfile(name: "Casey", goal: "fitness", goalDetail: "")
+        profile.currentStreak = 10 // would have satisfied the old buggy condition
+        context.insert(profile)
+        let entry = DailyEntry(date: Date())
+        entry.profile = profile
+        context.insert(entry)
+        try context.save()
+
+        let withoutFlag = AchievementManager.shared.check(profile: profile, entry: entry, xpManager: XPManager.shared)
+        XCTAssertFalse(
+            withoutFlag.contains { $0.id == "perfect_week" },
+            "a high streak alone should no longer be enough to unlock perfect_week"
+        )
+
+        let withFlag = AchievementManager.shared.check(
+            profile: profile, entry: entry, xpManager: XPManager.shared, isPerfectWeek: true
+        )
+        XCTAssertTrue(withFlag.contains { $0.id == "perfect_week" })
+    }
+
     // MARK: - AchievementManager against a real profile/entry
 
     func testAchievementCheckDoesNotCrashOnFreshProfile() throws {

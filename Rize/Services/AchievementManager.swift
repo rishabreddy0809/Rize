@@ -108,7 +108,12 @@ final class AchievementManager: ObservableObject {
     /// celebrating them one at a time, since presenting multiple full-screen
     /// unlock celebrations at once is what caused the overlapping-overlay glitch.
     @discardableResult
-    func check(profile: UserProfile, entry: DailyEntry?, xpManager: XPManager) -> [AchievementDefinition] {
+    func check(
+        profile: UserProfile,
+        entry: DailyEntry?,
+        xpManager: XPManager,
+        isPerfectWeek: Bool = false
+    ) -> [AchievementDefinition] {
         var newlyUnlocked: [AchievementDefinition] = []
 
         func consider(_ id: String, _ condition: Bool) {
@@ -124,7 +129,11 @@ final class AchievementManager: ObservableObject {
         let lowEnergyDayDone = entry.map { $0.isFullyComplete && ($0.energyScore ?? .max) <= 3 } ?? false
         consider("low_energy_warrior", lowEnergyDayDone)
 
-        consider("iron_will", profile.currentStreak >= 7)
+        // A permanent milestone ("ever reached a 7-day streak"), not the
+        // live streak — `bestStreak` is a high-water mark that survives a
+        // later reset, unlike `currentStreak`. Distinct from `perfect_week`
+        // below, which is stricter (every task done, not just >=1/day).
+        consider("iron_will", profile.bestStreak >= 7)
 
         let history = xpManager.defenseHistory
         // Actual vitality, not just "at least one task done that day" —
@@ -137,7 +146,11 @@ final class AchievementManager: ObservableObject {
         let hour = Calendar.current.component(.hour, from: Date())
         consider("ghost_mode", hour >= 0 && hour < 4 && entry?.energyScore != nil)
 
-        consider("perfect_week", profile.currentStreak >= 7)
+        // Stricter than `iron_will`: every task completed (not just >=1) on
+        // each of the last 7 days — computed by the caller (`TodayView`,
+        // which has SwiftData access to walk `DailyEntry` history) and
+        // passed in, since `AchievementManager` doesn't hold a model context.
+        consider("perfect_week", isPerfectWeek)
         consider("comeback_kid", entry?.comebackBonusApplied == true)
 
         return newlyUnlocked

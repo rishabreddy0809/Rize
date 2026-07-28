@@ -748,7 +748,7 @@ struct TodayView: View {
         // would never unlock it, since the achievement check only ran at
         // task-completion time (hour=9, condition false).
         if let profile {
-            for achievement in achievementManager.check(profile: profile, entry: entry, xpManager: xpManager) {
+            for achievement in achievementManager.check(profile: profile, entry: entry, xpManager: xpManager, isPerfectWeek: isPerfectWeek()) {
                 celebrationCenter.enqueue(.achievement(achievement))
             }
         }
@@ -1146,7 +1146,7 @@ struct TodayView: View {
         }
 
         // Achievements — queue any newly unlocked ones so they celebrate one at a time.
-        for achievement in achievementManager.check(profile: profile, entry: entry, xpManager: xpManager) {
+        for achievement in achievementManager.check(profile: profile, entry: entry, xpManager: xpManager, isPerfectWeek: isPerfectWeek()) {
             celebrationCenter.enqueue(.achievement(achievement))
         }
     }
@@ -1169,6 +1169,22 @@ struct TodayView: View {
         if weekTotal > profile.bestTasksCompletedInWeek {
             profile.bestTasksCompletedInWeek = weekTotal
         }
+    }
+
+    /// True only if each of the last 7 calendar days (today back through 6
+    /// days ago) has a `DailyEntry` where every task was completed — a
+    /// stricter bar than `iron_will`'s streak (which only requires >=1 task
+    /// per day). Backs the "perfect_week" achievement.
+    private func isPerfectWeek() -> Bool {
+        let calendar = Calendar.current
+        let todayStart = calendar.startOfDay(for: Date())
+        for offset in 0..<7 {
+            guard let day = calendar.date(byAdding: .day, value: -offset, to: todayStart),
+                  let dayEntry = fetchEntry(for: day),
+                  dayEntry.isFullyComplete
+            else { return false }
+        }
+        return true
     }
 
     private func fetchEntry(for date: Date) -> DailyEntry? {
