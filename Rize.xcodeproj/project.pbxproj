@@ -50,6 +50,7 @@
 		AA000404 /* CelebrationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000403 /* CelebrationCenter.swift */; };
 		AA000406 /* WorkoutTaskMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000405 /* WorkoutTaskMatcher.swift */; };
 		AA000408 /* AddTaskSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000407 /* AddTaskSheet.swift */; };
+		AA00040A /* EditTaskSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000409 /* EditTaskSheet.swift */; };
 		AB3728C03007D5670021D221 /* Tier2.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728BF3007D5670021D221 /* Tier2.atlas */; };
 		AB3728C83009511B0021D221 /* Tier3.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728C73009511B0021D221 /* Tier3.atlas */; };
 		AB3728CA300C25CF0021D221 /* Tier4.atlas in Resources */ = {isa = PBXBuildFile; fileRef = AB3728C9300C25CF0021D221 /* Tier4.atlas */; };
@@ -66,6 +67,7 @@
 		D0472C15EC819821383C3C8C /* PlanningEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA7A58AC3A1769F2ED70EDCC /* PlanningEngineTests.swift */; };
 		4CE219A06AF84114B25FC09B /* PersistenceIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 385ECEDE35304B8CB7C60AF5 /* PersistenceIntegrationTests.swift */; };
 		5F54EC0E1151EDE4957B6B8C /* ModelLogicTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61612F824152353C87A4202 /* ModelLogicTests.swift */; };
+		159D074B83C421C9BAA70C81 /* RecurringTaskSchedulingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDCC3601E3DF4D6BCF50BC04 /* RecurringTaskSchedulingTests.swift */; };
 		31189D7AB751C823F8430F8B /* PhoenixDesignSystemTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4C62022E6AE751DB6ABAB46 /* PhoenixDesignSystemTests.swift */; };
 		07AC7E9FA2E0F2DD0227FCBD /* WorkoutTaskMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35D06A737F960C1686A6245D /* WorkoutTaskMatcherTests.swift */; };
 		1778FCBC6B04F6A16BBA3382 /* UtilityExtensionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73150C4AA2C45D991922843F /* UtilityExtensionTests.swift */; };
@@ -159,6 +161,7 @@
 		AA000403 /* CelebrationCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CelebrationCenter.swift; sourceTree = "<group>"; };
 		AA000405 /* WorkoutTaskMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTaskMatcher.swift; sourceTree = "<group>"; };
 		AA000407 /* AddTaskSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTaskSheet.swift; sourceTree = "<group>"; };
+		AA000409 /* EditTaskSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTaskSheet.swift; sourceTree = "<group>"; };
 		AB3728BF3007D5670021D221 /* Tier2.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier2.atlas; sourceTree = "<group>"; };
 		AB3728C73009511B0021D221 /* Tier3.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier3.atlas; sourceTree = "<group>"; };
 		AB3728C9300C25CF0021D221 /* Tier4.atlas */ = {isa = PBXFileReference; lastKnownFileType = folder.skatlas; path = Tier4.atlas; sourceTree = "<group>"; };
@@ -174,6 +177,7 @@
 		EA7A58AC3A1769F2ED70EDCC /* PlanningEngineTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlanningEngineTests.swift; sourceTree = "<group>"; };
 		385ECEDE35304B8CB7C60AF5 /* PersistenceIntegrationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PersistenceIntegrationTests.swift; sourceTree = "<group>"; };
 		D61612F824152353C87A4202 /* ModelLogicTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ModelLogicTests.swift; sourceTree = "<group>"; };
+		FDCC3601E3DF4D6BCF50BC04 /* RecurringTaskSchedulingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecurringTaskSchedulingTests.swift; sourceTree = "<group>"; };
 		A4C62022E6AE751DB6ABAB46 /* PhoenixDesignSystemTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PhoenixDesignSystemTests.swift; sourceTree = "<group>"; };
 		35D06A737F960C1686A6245D /* WorkoutTaskMatcherTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WorkoutTaskMatcherTests.swift; sourceTree = "<group>"; };
 		73150C4AA2C45D991922843F /* UtilityExtensionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = UtilityExtensionTests.swift; sourceTree = "<group>"; };
@@ -359,6 +363,7 @@
 				AA000401 /* AchievementUnlockedView.swift */,
 				81D9FC9B623E3B0981C04F3D /* AchievementSharePlaque.swift */,
 				AA000407 /* AddTaskSheet.swift */,
+				AA000409 /* EditTaskSheet.swift */,
 				AA000240 /* ProgressView.swift */,
 				AA000242 /* ProfileView.swift */,
 				AA000570 /* EditProfileView.swift */,
@@ -390,6 +395,7 @@
 				EA7A58AC3A1769F2ED70EDCC /* PlanningEngineTests.swift */,
 				385ECEDE35304B8CB7C60AF5 /* PersistenceIntegrationTests.swift */,
 				D61612F824152353C87A4202 /* ModelLogicTests.swift */,
+				FDCC3601E3DF4D6BCF50BC04 /* RecurringTaskSchedulingTests.swift */,
 				A4C62022E6AE751DB6ABAB46 /* PhoenixDesignSystemTests.swift */,
 				35D06A737F960C1686A6245D /* WorkoutTaskMatcherTests.swift */,
 				73150C4AA2C45D991922843F /* UtilityExtensionTests.swift */,
@@ -563,6 +569,7 @@
 				D0472C15EC819821383C3C8C /* PlanningEngineTests.swift in Sources */,
 				4CE219A06AF84114B25FC09B /* PersistenceIntegrationTests.swift in Sources */,
 				5F54EC0E1151EDE4957B6B8C /* ModelLogicTests.swift in Sources */,
+				159D074B83C421C9BAA70C81 /* RecurringTaskSchedulingTests.swift in Sources */,
 				31189D7AB751C823F8430F8B /* PhoenixDesignSystemTests.swift in Sources */,
 				07AC7E9FA2E0F2DD0227FCBD /* WorkoutTaskMatcherTests.swift in Sources */,
 				1778FCBC6B04F6A16BBA3382 /* UtilityExtensionTests.swift in Sources */,
@@ -592,6 +599,7 @@
 				AA000404 /* CelebrationCenter.swift in Sources */,
 				AA000406 /* WorkoutTaskMatcher.swift in Sources */,
 				AA000408 /* AddTaskSheet.swift in Sources */,
+				AA00040A /* EditTaskSheet.swift in Sources */,
 				AA000231 /* RyzDialogue.swift in Sources */,
 				AA000233 /* ParticleSystem.swift in Sources */,
 				AA000235 /* OnboardingView.swift in Sources */,

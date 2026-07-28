@@ -55,6 +55,17 @@ final class RizeTask {
     /// `PlanCategory` bucket. Optional for lightweight migration.
     var sectionLabel: String?
 
+    /// Comma-separated `Calendar` weekday numbers (Sun=1...Sat=7) this task
+    /// repeats on. Empty/nil means a one-time task. See `recurrenceDays` for
+    /// typed access.
+    var recurrenceDaysRaw: String?
+
+    /// Stable id shared by every day's instance of the same repeating task —
+    /// lets `TodayView.generatePlan` find the most recent instance of a
+    /// repeating task and spin up today's copy under the same identity.
+    /// `nil` for one-time tasks.
+    var recurrenceGroupID: UUID?
+
     var entry: DailyEntry?
 
     init(
@@ -64,7 +75,9 @@ final class RizeTask {
         type: String,
         priority: TaskPriority = .medium,
         dueDate: Date? = nil,
-        sectionLabel: String? = nil
+        sectionLabel: String? = nil,
+        recurrenceDays: Set<Int> = [],
+        recurrenceGroupID: UUID? = nil
     ) {
         self.id = UUID()
         self.title = title
@@ -77,12 +90,22 @@ final class RizeTask {
         self.priorityRaw = priority.rawValue
         self.dueDate = dueDate
         self.sectionLabel = sectionLabel
+        self.recurrenceGroupID = recurrenceGroupID
+        self.recurrenceDaysRaw = recurrenceDays.isEmpty
+            ? nil
+            : recurrenceDays.sorted().map(String.init).joined(separator: ",")
     }
 
     /// Typed priority, defaulting to `.medium` for legacy rows.
     var priority: TaskPriority {
         get { TaskPriority(rawValue: priorityRaw ?? "") ?? .medium }
         set { priorityRaw = newValue.rawValue }
+    }
+
+    /// Typed weekday set, parsed from `recurrenceDaysRaw`.
+    var recurrenceDays: Set<Int> {
+        get { Set((recurrenceDaysRaw ?? "").split(separator: ",").compactMap { Int($0) }) }
+        set { recurrenceDaysRaw = newValue.isEmpty ? nil : newValue.sorted().map(String.init).joined(separator: ",") }
     }
 }
 

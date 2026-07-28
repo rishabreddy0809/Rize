@@ -122,4 +122,37 @@ final class ModelLogicTests: XCTestCase {
         XCTAssertEqual(task.priorityRaw, TaskPriority.low.rawValue)
         XCTAssertEqual(task.priority, .low)
     }
+
+    // MARK: - RizeTask.recurrenceDays
+
+    func testRecurrenceDaysDefaultsToEmptyForOneTimeTask() {
+        let task = RizeTask(title: "T", duration: "10 min", taskDescription: "", type: "work")
+        XCTAssertEqual(task.recurrenceDays, [])
+        XCTAssertNil(task.recurrenceDaysRaw)
+    }
+
+    func testRecurrenceDaysRoundTripsThroughInit() {
+        let task = RizeTask(
+            title: "Gym",
+            duration: "30 min",
+            taskDescription: "",
+            type: "physical",
+            recurrenceDays: [2, 4, 6]
+        )
+        XCTAssertEqual(task.recurrenceDays, [2, 4, 6])
+        XCTAssertEqual(task.recurrenceDaysRaw, "2,4,6", "should serialize sorted, comma-separated")
+    }
+
+    func testRecurrenceDaysSetterClearsRawValueWhenEmptied() {
+        let task = RizeTask(title: "Gym", duration: "30 min", taskDescription: "", type: "physical", recurrenceDays: [1])
+        task.recurrenceDays = []
+        XCTAssertNil(task.recurrenceDaysRaw, "clearing repeat days should fall back to nil, not an empty string")
+        XCTAssertEqual(task.recurrenceDays, [])
+    }
+
+    func testRecurrenceDaysGetterToleratesMalformedRawValue() {
+        let task = RizeTask(title: "T", duration: "10 min", taskDescription: "", type: "work")
+        task.recurrenceDaysRaw = "3,,x,5" // simulates a corrupted/partial row
+        XCTAssertEqual(task.recurrenceDays, [3, 5], "non-numeric or empty components should be dropped, not crash")
+    }
 }

@@ -166,9 +166,9 @@ struct PhoenixView: View {
             HStack(spacing: 0) {
                 statItem(icon: "flame.fill", value: "\(profile?.currentStreak ?? 0)", label: "STREAK", color: .orange)
                 divider
-                statItem(icon: "crown.fill", value: "\(profile?.bestStreak ?? 0)", label: "BEST", color: PhoenixPalette.radiant)
+                statItem(icon: "trophy.fill", value: "\(profile?.bestStreak ?? 0)", label: "BEST", color: PhoenixPalette.radiant)
                 divider
-                statItem(icon: "shield.fill", value: "\(xpManager.realmDefense)%", label: "DEFENSE", color: PhoenixDesign.defenseBarColor(xpManager.realmDefense))
+                statItem(icon: "heart.fill", value: "\(xpManager.realmDefense)%", label: "HEALTH", color: PhoenixDesign.defenseBarColor(xpManager.realmDefense))
             }
         }
         .padding(16)

@@ -13,6 +13,9 @@ extension Notification.Name {
 struct CustomTaskRequest {
     let title: String
     let dueDate: Date?
+    /// `Calendar` weekday numbers (Sun=1...Sat=7) to repeat on. Empty means
+    /// a one-time task.
+    let recurrenceDays: Set<Int>
 }
 
 /// Wraps `UNUserNotificationCenter`, the UserNotifications framework's single

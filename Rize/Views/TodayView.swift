@@ -23,6 +23,8 @@ struct TodayView: View {
     /// The scheduled task currently prompting "did you finish this?" — only
     /// one at a time, same pattern as the celebration queue.
     @State private var overdueTaskAlert: RizeTask? = nil
+    /// The task currently open in the edit sheet, tapped from its row.
+    @State private var editingTask: RizeTask? = nil
 
     private var profile: UserProfile? { profiles.first }
 
@@ -150,6 +152,11 @@ struct TodayView: View {
         .onReceive(NotificationCenter.default.publisher(for: .rizeAddCustomTask)) { note in
             guard let request = note.object as? CustomTaskRequest else { return }
             addCustomTask(request)
+        }
+        .sheet(item: $editingTask) { task in
+            EditTaskSheet(task: task) { fields in
+                applyTaskEdits(fields, to: task)
+            }
         }
         .alert(
             "Still on your list",
@@ -483,6 +490,9 @@ struct TodayView: View {
                                 },
                                 onDelete: {
                                     removeTask(task)
+                                },
+                                onEdit: {
+                                    editingTask = task
                                 }
                             )
                         }
@@ -761,6 +771,13 @@ struct TodayView: View {
             // Nothing generic — the tasks always serve the user's stated goal.
             let goalTasks = await GoalTaskGenerator.tasks(for: plan, context: coachingContext(profile))
 
+            // Snapshot the most recent instance of every repeating task
+            // *before* wiping today's tasks below — this is what lets a
+            // repeating task survive both an overnight regeneration and a
+            // same-day "regenerate plan" tap, since either would otherwise
+            // delete its only on-disk copy.
+            let recurringTemplates = latestRecurringTemplates()
+
             // Clear any previously generated tasks so regenerating doesn't
             // stack duplicates.
             for old in entry.tasks {
@@ -824,6 +841,25 @@ struct TodayView: View {
                     entry.tasks.append(rt)
                     NotificationManager.shared.scheduleTaskDueReminder(taskID: rt.id, title: rt.title, dueDate: event.date)
                 }
+            }
+
+            // Repeating tasks due today (by weekday), reinstantiated from
+            // whichever day's copy is most recent so title/duration edits
+            // carry forward.
+            let todayWeekday = Calendar.current.component(.weekday, from: Date())
+            for template in RecurringTemplate.due(recurringTemplates, onWeekday: todayWeekday) {
+                let rt = RizeTask(
+                    title: template.title,
+                    duration: template.duration,
+                    taskDescription: "Repeats",
+                    type: template.type,
+                    sectionLabel: template.sectionLabel,
+                    recurrenceDays: template.days,
+                    recurrenceGroupID: template.groupID
+                )
+                rt.entry = entry
+                modelContext.insert(rt)
+                entry.tasks.append(rt)
             }
 
             entry.totalTasksForDay = entry.tasks.count
@@ -909,7 +945,9 @@ struct TodayView: View {
             duration: duration,
             taskDescription: "Added by you",
             type: category.rawValue,
-            dueDate: request.dueDate
+            dueDate: request.dueDate,
+            recurrenceDays: request.recurrenceDays,
+            recurrenceGroupID: request.recurrenceDays.isEmpty ? nil : UUID()
         )
         task.entry = entry
         modelContext.insert(task)
@@ -921,6 +959,44 @@ struct TodayView: View {
         if let dueDate = request.dueDate {
             NotificationManager.shared.scheduleTaskDueReminder(taskID: task.id, title: task.title, dueDate: dueDate)
         }
+    }
+
+    /// Applies user edits from `EditTaskSheet` to an existing task in place,
+    /// re-deriving its schedule label the same way `addCustomTask` does and
+    /// keeping the due-date reminder in sync. Editing the repeat days here
+    /// changes the whole series going forward (see the recurring-task
+    /// snapshot in `generatePlan`), not just today's instance.
+    private func applyTaskEdits(_ fields: EditedTaskFields, to task: RizeTask) {
+        NotificationManager.shared.cancelTaskDueReminder(taskID: task.id)
+
+        task.title = fields.title
+        task.duration = fields.dueDate.map {
+            TodayView.scheduleLabel(daysUntil: daysUntil(for: $0), date: $0)
+        } ?? "Anytime"
+        task.dueDate = fields.dueDate
+
+        if fields.recurrenceDays.isEmpty {
+            task.recurrenceDays = []
+            task.recurrenceGroupID = nil
+        } else {
+            task.recurrenceDays = fields.recurrenceDays
+            if task.recurrenceGroupID == nil {
+                task.recurrenceGroupID = UUID()
+            }
+        }
+
+        try? modelContext.save()
+        if let dueDate = fields.dueDate {
+            NotificationManager.shared.scheduleTaskDueReminder(taskID: task.id, title: task.title, dueDate: dueDate)
+        }
+    }
+
+    /// One snapshot per repeating-task series, taken from whichever instance
+    /// (today's or an earlier day's) was most recently created — that's the
+    /// copy whose title/time/repeat-days edits are current.
+    private func latestRecurringTemplates() -> [RecurringTemplate] {
+        let allTasks = (try? modelContext.fetch(FetchDescriptor<RizeTask>())) ?? []
+        return RecurringTemplate.latest(from: allTasks)
     }
 
     /// Today's entry, created on the spot if the user adds a task before
@@ -1187,6 +1263,51 @@ struct TodayView: View {
 
     private static var todayDateString: String {
         dayFormatter.string(from: Date())
+    }
+}
+
+// MARK: - Recurring Task Scheduling
+
+/// Plain-value snapshot of a repeating task, taken before its owning
+/// `RizeTask` row is deleted, so `generatePlan` can recreate today's instance
+/// without touching a (possibly already-deleted) model object. Pulled out to
+/// file scope (rather than nested/private on `TodayView`) so the selection
+/// logic below can be unit tested without a SwiftUI view or `ModelContext`.
+struct RecurringTemplate: Equatable {
+    let groupID: UUID
+    let title: String
+    let duration: String
+    let type: String
+    let sectionLabel: String?
+    let days: Set<Int>
+
+    /// One snapshot per repeating-task series, taken from whichever instance
+    /// (today's or an earlier day's) was most recently created — that's the
+    /// copy whose title/time/repeat-days edits are current. Tasks with no
+    /// `recurrenceGroupID` (one-time tasks) are ignored.
+    static func latest(from tasks: [RizeTask]) -> [RecurringTemplate] {
+        var latestByGroup: [UUID: (task: RizeTask, date: Date)] = [:]
+        for task in tasks {
+            guard let groupID = task.recurrenceGroupID else { continue }
+            let entryDate = task.entry?.date ?? .distantPast
+            if let existing = latestByGroup[groupID], existing.date >= entryDate { continue }
+            latestByGroup[groupID] = (task, entryDate)
+        }
+        return latestByGroup.map { groupID, entry in
+            RecurringTemplate(
+                groupID: groupID,
+                title: entry.task.title,
+                duration: entry.task.duration,
+                type: entry.task.type,
+                sectionLabel: entry.task.sectionLabel,
+                days: entry.task.recurrenceDays
+            )
+        }
+    }
+
+    /// Series due on the given `Calendar` weekday (Sun=1...Sat=7).
+    static func due(_ templates: [RecurringTemplate], onWeekday weekday: Int) -> [RecurringTemplate] {
+        templates.filter { $0.days.contains(weekday) }
     }
 }
 
@@ -1471,6 +1592,7 @@ struct TaskRowView: View {
     let tierColor: Color
     let onComplete: () -> Void
     let onDelete: () -> Void
+    let onEdit: () -> Void
 
     @State private var bouncing = false
     /// The row's *settled* horizontal offset — where it rests when no
@@ -1587,8 +1709,11 @@ struct TaskRowView: View {
                     // A tap anywhere on an already-open row closes it, so the
                     // checkbox/title underneath doesn't fire an unrelated
                     // action (completing the task) as the "close" gesture.
+                    // A tap on an already-closed row opens the edit sheet.
                     if settledOffset != 0 {
                         withAnimation(Constants.springAnimation) { settledOffset = 0 }
+                    } else {
+                        onEdit()
                     }
                 }
         }
@@ -1670,6 +1795,9 @@ struct TaskRowView: View {
         }
         .accessibilityAction(named: "Delete") {
             onDelete()
+        }
+        .accessibilityAction(named: "Edit") {
+            onEdit()
         }
     }
 }
