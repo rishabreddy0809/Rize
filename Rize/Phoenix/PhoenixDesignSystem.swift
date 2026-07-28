@@ -1,41 +1,5 @@
 import SwiftUI
 
-// MARK: - Phoenix Task Section
-
-enum PhoenixTaskSection: String, CaseIterable {
-    case morning
-    case anytime
-    case evening
-    case queue
-
-    var title: String {
-        switch self {
-        case .morning: return "Morning"
-        case .anytime: return "Anytime"
-        case .evening: return "Evening"
-        case .queue: return "Queue"
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .morning: return "sunrise.fill"
-        case .anytime: return "bolt.fill"
-        case .evening: return "moon.fill"
-        case .queue: return "list.bullet"
-        }
-    }
-
-    static func from(taskType: String) -> PhoenixTaskSection {
-        switch taskType.lowercased() {
-        case "physical": return .morning
-        case "work": return .anytime
-        case "recovery": return .evening
-        default: return .queue
-        }
-    }
-}
-
 // MARK: - Plan Category
 
 /// The category a task belongs to in the Today plan. Real calendar events are
@@ -186,10 +150,6 @@ extension Font {
         .custom("Cinzel-Bold", size: size, relativeTo: .headline)
     }
 
-    /// Small labels/badges that still want the display face.
-    static func phoenixLabel(_ size: CGFloat) -> Font {
-        .custom("Cinzel-Bold", size: size, relativeTo: .caption)
-    }
 }
 
 // MARK: - Fire Gradient Background
@@ -252,15 +212,6 @@ enum PhoenixDesign {
         if percent > 60 { return PhoenixPalette.success }
         if percent >= 30 { return PhoenixPalette.primary }
         return PhoenixPalette.destructive
-    }
-
-    static func sectionColor(_ section: PhoenixTaskSection) -> Color {
-        switch section {
-        case .morning: return .orange
-        case .anytime: return Color(hex: "0A84FF")
-        case .evening: return .purple
-        case .queue: return .gray
-        }
     }
 }
 

@@ -220,19 +220,6 @@ final class NotificationManager: ObservableObject {
         UNUserNotificationCenter.current().add(request)
     }
 
-    func scheduleSiegeBrokenNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Your Phoenix is fed 🔥"
-        content.body = "You kept the fire alive. Bonus XP earned."
-        content.sound = .default
-        let request = UNNotificationRequest(
-            identifier: "rize_siege_broken",
-            content: content,
-            trigger: nil
-        )
-        UNUserNotificationCenter.current().add(request)
-    }
-
     func cancelSiegeNotifications() {
         UNUserNotificationCenter.current().removePendingNotificationRequests(
             withIdentifiers: ["rize_siege_start", "rize_siege_broken"]
@@ -275,22 +262,6 @@ final class NotificationManager: ObservableObject {
 
     private static func taskDueIdentifier(_ taskID: UUID) -> String {
         "rize_task_due_\(taskID.uuidString)"
-    }
-
-    // MARK: - Comeback
-
-    func scheduleComebackNotification() {
-        let content = UNMutableNotificationContent()
-        content.title = "Your flame needs you ☀️"
-        content.body = "No judgment. Just come back."
-        content.sound = .default
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 172800, repeats: false)
-        let request = UNNotificationRequest(
-            identifier: "rize_comeback",
-            content: content,
-            trigger: trigger
-        )
-        UNUserNotificationCenter.current().add(request)
     }
 }
 

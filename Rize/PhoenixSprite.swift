@@ -388,17 +388,3 @@ struct Tier4FlameView: View {
         .allowsHitTesting(false)
     }
 }
-
-// MARK: - UIKit alternative (UIImageView)
-import UIKit
-
-func makePhoenixImageView() -> UIImageView {
-    let frames = (0..<264).compactMap { UIImage(named: String(format: "phoenix_%03d", $0)) }
-    let iv = UIImageView()
-    iv.animationImages = frames
-    iv.animationDuration = 264.0 / 24.0    // 11s full flight loop
-    iv.animationRepeatCount = 0            // loop forever
-    iv.startAnimating()
-    iv.frame = CGRect(x: 0, y: 0, width: 256, height: 256)
-    return iv
-}

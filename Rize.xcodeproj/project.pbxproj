@@ -21,7 +21,6 @@
 		AA000221 /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000220 /* CalendarManager.swift */; };
 		AA000223 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000222 /* NotificationManager.swift */; };
 		AA000225 /* AchievementManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000224 /* AchievementManager.swift */; };
-		AA000229 /* PhoenixStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000228 /* PhoenixStateManager.swift */; };
 		AA000231 /* RyzDialogue.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000230 /* RyzDialogue.swift */; };
 		AA000233 /* ParticleSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000232 /* ParticleSystem.swift */; };
 		AA000235 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA000234 /* OnboardingView.swift */; };
@@ -128,7 +127,6 @@
 		AA000220 /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManager.swift; sourceTree = "<group>"; };
 		AA000222 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		AA000224 /* AchievementManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AchievementManager.swift; sourceTree = "<group>"; };
-		AA000228 /* PhoenixStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoenixStateManager.swift; sourceTree = "<group>"; };
 		AA000230 /* RyzDialogue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RyzDialogue.swift; sourceTree = "<group>"; };
 		AA000232 /* ParticleSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticleSystem.swift; sourceTree = "<group>"; };
 		AA000234 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -333,7 +331,6 @@
 				AA000220 /* CalendarManager.swift */,
 				AA000222 /* NotificationManager.swift */,
 				AA000224 /* AchievementManager.swift */,
-				AA000228 /* PhoenixStateManager.swift */,
 				AA000403 /* CelebrationCenter.swift */,
 				AA000405 /* WorkoutTaskMatcher.swift */,
 				AA000296 /* PlanningEngine.swift */,
@@ -595,7 +592,6 @@
 				AA000221 /* CalendarManager.swift in Sources */,
 				AA000223 /* NotificationManager.swift in Sources */,
 				AA000225 /* AchievementManager.swift in Sources */,
-				AA000229 /* PhoenixStateManager.swift in Sources */,
 				AA000404 /* CelebrationCenter.swift in Sources */,
 				AA000406 /* WorkoutTaskMatcher.swift in Sources */,
 				AA000408 /* AddTaskSheet.swift in Sources */,
